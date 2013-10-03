@@ -16,6 +16,7 @@
 
 - (void) serialPortsListDidChange;
 - (void) serialPortSelectionDidChange;
+- (void) selectedSerialPortWillBeRemovedFromSystem;
 
 @optional
 

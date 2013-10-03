@@ -18,6 +18,7 @@
 @property (readonly, strong) EISerialPortSelectionController *portSelectionController;
 
 @property (weak) IBOutlet NSPopUpButton *serialPortSelectionPopUp;
+@property (weak) IBOutlet NSTextField *selectedPortNameLabel;
 
 - (IBAction) changeSerialPortSelection:(id)sender;
 

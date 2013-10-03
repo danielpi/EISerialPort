@@ -2,20 +2,18 @@
 
 A Serial Port Framework for rapidly developing apps that talk to micro controllers.
 
-Micro controller based projects are lots of fun and they allow you to interact with the physical world. But their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds give a great opportunity to improve both areas. This should be simple to achieve.
+Micro controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds give a great opportunity to improve both areas. This should be simple to achieve.
 
 Keywords for the framework
 - Robust
 - reliable
-- efficient
-- fast
 - easy to use
 
 ## Programatic Interface
 ### Finding and selecting serial ports
 Main features of serial port selection
-- Easy to get a list of available ports
-- Easy to get lists that are tailored to specific GUI controls
+- Easy to find out which ports are available
+- Easy to fill GUI selection controls with the correct options
 - Notifications are sent as the available ports are changed
 - Previously selected ports are remembered across app restarts
 - Can select multiple ports within an app (all are remembered across restarts)

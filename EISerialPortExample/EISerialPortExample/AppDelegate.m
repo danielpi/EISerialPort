@@ -37,7 +37,11 @@
         if ([[self.serialPortSelectionPopUp selectedItem] title] != selectedPortName) {
             [self.serialPortSelectionPopUp selectItemWithTitle:selectedPortName];
             // Update whatever else needs the current serial port
+            
         }
+        [self.selectedPortNameLabel setStringValue:selectedPortName];
+    } else {
+        [self.selectedPortNameLabel setStringValue:@"<none>"];
     }
 }
 
@@ -53,6 +57,11 @@
         [[self.serialPortSelectionPopUp itemWithTitle:portName] setEnabled:portEnabled];
         [self serialPortSelectionDidChange];
     }
+}
+
+- (void)serialPortWillBeRemovedFromSystem:(EISerialPort *)serialPort
+{
+    
 }
 
 @end

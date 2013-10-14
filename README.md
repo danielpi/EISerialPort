@@ -2,12 +2,74 @@
 
 A Serial Port Framework for rapidly developing apps that talk to micro controllers.
 
-Micro controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds give a great opportunity to improve both areas. This should be simple to achieve.
+Micro controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds gives a great opportunity to improve both areas. This should be simple to achieve.
 
-Keywords for the framework
-- Robust
-- reliable
-- easy to use
+## Finding and selecting serial ports
+Serial ports have become a lot more dynamic in recent years. Instead of built in ports with fixed names we now have USB and Bluetooth ports which come and go. Any program that interacts with serial ports should
+- Be able to identify the ports that are actually available
+- Handle ports that are added or removed from the system during operation
+- Identify which underlying comms method is backing the port (USB, Bluetooth)
+- Remember which port was previously used the last time the app was open
+
+Each section of your program that is going to require access to a port is assumed to have its own controller object (a view, window or app controller for instance). This controller object is in charge of creating an EISerialPortSelectionController object. It will also be the delegate for the EISerialPortSelectionController object. One way to do this would be the following
+
+    - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+    {
+        // Insert code here to initialize your application
+        _portSelectionController = [[EISerialPortSelectionController alloc] initWithLabel:@"window1"];
+        [_portSelectionController setDelegate:self];
+    }
+    
+Note that when you create an EISerialPortSelectionController object you specify a label. This is to identify what the selected port will do within your program. If for example you wrote an app that used two ports, one for bootstrap loading and one for telemetry you might use the labels "bootstrap" and "telemetry" for the two EISerialPortSelectionController objects. This way which port is used for each task can be remembered when your program restarts.
+
+The _portSelectionController maintains a list of the available ports as well as a couple of other lists which make it easy to fill out GUI selection controls. To get an alphabetically sorted list of ports you could use the following
+
+	NSArray *ports = [_portSelectionController availablePorts];
+
+
+
+### Programatically selecting a port
+You use an EISerialPortSelectionController object to handle the selection of a port for a particular use. Below is a very simple example of selecting a port programatically.
+
+	EISerialPortSelectionController *portSelection = [[EISerialPortSelectionController alloc] initWithLabel:@"aLabelOfYourChoice"];
+	NSArray *ports = [portSelection availablePorts];
+	
+	[portSelection selectPortWithName:@"name of one of the ports"];
+	NSLog(@"%@", [portSelection selectedPort]);
+
+Things to note
+- The EISerialPortSelectionController instance, portSelection, know which ports are available on the system. It maintains an array via the availablePorts property.
+- You can ask the portSelection object to select a port by name. It will then keep a reference to that port via its selectedPort property
+- When you create an EISerialPortSelectionController object you specify a label. This is to identify what the selected port will do within your program. If for example you wrote an app that used two ports, one for bootstrap loading and one for telemetry you might use the labels "bootstrap" and "telemetry" for the two EISerialPortSelectionController objects that you use. This way which port is used for each task can be remembered when your program restarts.
+
+### Selecting a port from a GUI
+More often than not you are going to want to have some way of graphically selecting a port. EISerialPort tries to make this as easy as possible by providing the required data for several standard selection methods.
+
+####Using a Pop Up Button
+![Example of a PopUp Button](/Users/danielpi/Dropbox/Programming/EISerialPort/README_Images/PopUpButton_Screenshot.png)
+
+PopUp buttons are a convenient method of providing a list of ports to be selected from. To use them you need to cover the following steps
+
+- Add a NSPopUpButton to your UI from Interface Builder
+- Create a EISerialPortSelectionController object within your own controller object and set its delegate to your controller object
+- Make your controller object (a view, window or app controller) conform to the EISerialPortSelectionDelegate protocol.
+- Implement the following methods
+	- serialPortsListDidChange
+	- serialPortSelectionDidChange
+	- serialPortWillBeRemovedFromSystem:(EISerialPort *)serialPort
+
+
+
+When your 
+
+    - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+    {
+        // Insert code here to initialize your application
+        _portSelectionController = [[EISerialPortSelectionController alloc] initWithLabel:@"window1"];
+        [_portSelectionController setDelegate:self];
+    }
+	
+
 
 ## Programatic Interface
 ### Finding and selecting serial ports
@@ -33,6 +95,8 @@ First up here is an example of programatically selecting a port.
 	NSLog(@"%@", [portSelection selectedPort]);
 	
 One of the advantages of using EISerialPortSelectionController is that it provides a bunch of notifications. KVO, Notification Center, Delegate methods.
+
+Would be good if ports that are already opened are greyed out in any other selection list. So if you have a second terminal open you can't select an open port from another window. Or should you be able to have multiple windows open to the same port. Broadcast received text to all controls within the same app and batch any sends. This is what I want to happen for multiple different views of the data.
 
 
 
@@ -250,6 +314,54 @@ Some selection controls also need to be able to handle the following
 I'm not sure whether EISerial should own the selection task entirely or hand it off to a delegate. How is multiple selection handled? Should the control or the EISerialPortManager maintain knowledge of the selection? Lots of questions.
 
 
+
+
+## Overall Architecture
+
+- EISerialPortManager is a singleton. It keeps a set of all available ports. When the operating system provides a notification that a port has been added or removed from the system the EISerialPortManager adds or removes the port from its set. It also initialises or destroys the port itself. Via KVO the EISerialPortSelectionController is also notified that the list of ports has changed.
+- There is one EISerialPort for every available port. This is how you interact with the serial port. When a port is removed the EISerialPort dissappears.
+- EISerialPortSelectionController stores the currently selected port. It has a delegate that is often the view controller for the app.
+- NSPopupButton. Used to select a port. Gets controlled by the view controller above.
+- Serial Text View. Intercepts keystrokes and serial comms. Needs to register with the serial port so that it can receive incoming character events as well as port removed events.
+
+
+## Notifications
+
+### Port added to the system
+- The operating system provides a notification to the EISerialPortManager.
+- EISerialPortManager initialises an EISerialPort object and adds it to its availablePorts set.
+- Via KVO, all EISerialPortSelectionControllers are notified that the availablePorts set has changed.
+- Each EISerialPortSelectionController notifies its delegate that the ports list has changed via the serialPortsListDidChange delgate method.
+- Each of the view controllers needs to query the Selection Controller for an updated list of ports and then instigate UI updates in each of the controls that it overseas.
+
+### Port removed from the system
+- The operating system provides a notification to the EISerialPortManager.
+- EISerialPortManager initialises an EISerialPort object and adds it to its availablePorts set.
+- Via KVO, all EISerialPortSelectionControllers are notified that the availablePorts set has changed.
+- Each EISerialPortSelectionController notifies its delegate that the ports list has changed via the serialPortsListDidChange delgate method.
+- The view controller needs to query the Selection Controller for an updated list of ports and then instigate UI updates in each of the controls that it overseas.
+
+### Serial port selected
+- The UI element used for selection reports back to the view controller which port has been chosen.
+- The window controller tells the EISerialPortSelectionController which port has been selected.
+- The EISerialPortSelectionController sets it's selectedPort property to this port and calls the delegate method serialPortSelectionDidChange:
+- The view controller queries the Selection Controller for an updated list of ports and then instigates any required UI updates in each of the controls that it overseas.
+
+### Selected port removed from the system
+
+### Selected port settings changed
+
+### Selected port opened
+- UI control messages the view controller to open the selected port
+- View Controller asks the Selection controller for the selected port and then tells it to open.
+- The port sends out an EISerialPortDidOpen notification
+
+### Selected port closed
+
+### Characters are received into an opened serial port
+- The port sends out notifications…
+
+### Serial port settings get changed
 
 
 

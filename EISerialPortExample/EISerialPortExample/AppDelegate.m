@@ -14,7 +14,7 @@
 {
     // Insert code here to initialize your application
     _portManager = [EISerialPortManager sharedManager];
-    _portSelectionController = [[EISerialPortSelectionController alloc] init];
+    _portSelectionController = [[EISerialPortSelectionController alloc] initWithLabel:@"window1"];
     [_portSelectionController setDelegate:self];
     NSLog(@"Port Manager:%@", _portManager);
 }

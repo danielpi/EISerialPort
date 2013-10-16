@@ -40,7 +40,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
 
 - (id) init
 {
-    self = [[EISerialPortSelectionController alloc] initWithLabel:@"default"];
+    self = [[EISerialPortSelectionController alloc] initWithLabel:@"EISerialPort_defaultPortLabel"];
     return self;
 }
 
@@ -51,14 +51,16 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     NSString *selectedPortName = [defaults objectForKey:_label];
     EISerialPort *defaultPort = [_portManager serialPortWithName:selectedPortName];
     
-    NSLog(@"Default port:%@", defaultPort);
-    NSLog(@"Available ports:%@", _portManager.availablePorts);
+    //NSLog(@"Default port:%@", defaultPort);
+    //NSLog(@"Available ports:%@", _portManager.availablePorts);
     
     //NSLog(@"valueForKey:%@",[_portManager valueForKey:@"availablePorts"]);
     
     if ([defaultPort isNotEqualTo:nil]) {
-        [self changeSelectionToPortNamed:selectedPortName];
-        NSLog(@"Default port:%@", selectedPortName);
+        [self selectPortWithName:selectedPortName];
+        NSLog(@"Default port %@ selected", selectedPortName);
+    } else {
+        NSLog(@"Default port %@ not available", selectedPortName);
     }
 }
 
@@ -71,9 +73,9 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     NSLog(@"Object:%@ keyPath:%@ were observed", object, keyPath);
     
     if ([keyPath isEqual:@"availablePorts"]) {
-        [self serialPortsListDidChange];
-        if ( [_delegate respondsToSelector:@selector(serialPortsListDidChange)] ) {
-            [_delegate serialPortsListDidChange];
+        //[self serialPortsListDidChange];
+        if ( [_delegate respondsToSelector:@selector(availablePortsListDidChange)] ) {
+            [_delegate availablePortsListDidChange];
         }
     }
     /*
@@ -87,12 +89,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     */
 }
 
-- (void)serialPortsListDidChange
-{
-    // Check if the selected port was removed.
-}
-
-- (NSArray *)availablePortsAlphabetical
+- (NSArray *)availablePorts
 {
     NSArray *sortedPorts;
     NSSortDescriptor *sortDesc = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
@@ -113,14 +110,14 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
         [portTitles addObject:@{@"name":@"Port Removed!", @"enabled":@NO}];
     }
     */
-    for (EISerialPort *port in self.availablePortsAlphabetical){
+    for (EISerialPort *port in self.availablePorts){
         [portTitles addObject:@{@"name":port.name, @"enabled":@YES}];
     }
     
     return portTitles;
 }
 
-- (void) changeSelectionToPortNamed:(NSString *)portName
+- (void) selectPortWithName:(NSString *)portName
 {
     if (portName != nil) {
         _selectedPort = [_portManager serialPortWithName:portName];
@@ -131,8 +128,8 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
         _selectedPort = nil;
     }
     
-    if ( [_delegate respondsToSelector:@selector(serialPortSelectionDidChange)] ) {
-        [_delegate serialPortSelectionDidChange];
+    if ( [_delegate respondsToSelector:@selector(selectedSerialPortDidChange)] ) {
+        [_delegate selectedSerialPortDidChange];
     }
 }
 

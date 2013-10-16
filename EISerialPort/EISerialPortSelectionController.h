@@ -14,11 +14,8 @@
 
 @protocol EISerialPortSelectionDelegate
 
-- (void) serialPortsListDidChange;
-- (void) serialPortSelectionDidChange;
-- (void) selectedSerialPortWillBeRemovedFromSystem;
-
-@optional
+- (void) availablePortsListDidChange;
+- (void) selectedSerialPortDidChange;
 
 @end
 
@@ -33,16 +30,15 @@ extern NSString * const EISelectedSerialPortNameKey;
 @property (readonly, strong) NSString *label;
 
 @property (readonly, weak) EISerialPort *selectedPort;
-@property (readonly, strong) NSString *previouslySelectedPortName;
 
 //@property (readonly) NSArray *availablePortsAlphabetical;
 //@property (readonly) NSArray *availablePortsByType;
 //@property (readonly) NSArray *popUpButtonDetails;
 
 - (id) initWithLabel:(NSString *)label;
-- (void) changeSelectionToPortNamed:(NSString *)portName;
+- (void) selectPortWithName:(NSString *)portName;
 
-- (NSArray *)availablePortsAlphabetical;
+- (NSArray *)availablePorts;
 - (NSArray *)popUpButtonDetails;
 
 @end

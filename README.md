@@ -4,6 +4,30 @@ A Serial Port Framework for rapidly developing apps that talk to micro controlle
 
 Micro controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds gives a great opportunity to improve both areas. This should be simple to achieve.
 
+## How to use this library
+
+The main components of this library are
+
+**EISerialPort** - For every available port on the computer there is an instance of EISerialPort. This object provides an Objective-C interface to the serial port. Opening, Closing, Changing settings, Reading and Writing all go through this object. You don't need to create the EISerialPort objects they are provided by the library. You simply need to choose the one you require from a list.
+
+**EISerialPortSelectionManager** - For each section of your app that requires access to a serial port you should create an instance of EISerialPortSelectionManager. This object keeps track of which port is selected and is able to provide lists of the available ports that are suitable filling out GUI selection controls. It is expected that your controller object will be set as the delegate for the EISerialPortSelectionManager object so that it can respond to changes to the available ports and to the selection.
+
+**EISerialPortManager** - This singleton class manages the creation and destruction of the EISerialPort objects in response to their addition or removal from the computer. You don't need to use this class as the EISerialPortSelectionManager provides the same functions with extra bells and whistles added.
+
+###What you need to do
+
+EISerialPort is meant to be used to build GUI applications that can make use of serial ports. It attempts to make it easy to present ports and the data that flows in and out of them to a user in a standard cocoa application. 
+
+It is expected that your app will need to present some or all of the following to the user
+- A list of ports to be selected from
+- Controls to select the settings required of the port
+- ASCII/binary view of the data that is being transferred via the port
+- The state of the port (opened, closed, present or not, blocked)
+- The state of data transfer (are characters being sent/received, how far through the download list are we)
+
+You need to provide a controller object that can mediate between the EISerialPort library and the GUI controls. It will need to be set as the delegate to the EISerialPortSelectionManager as well as the selected EISerialPort. Details below.
+
+
 ## Finding and selecting serial ports
 Serial ports have become a lot more dynamic in recent years. Instead of built in ports with fixed names we now have USB and Bluetooth ports which come and go. Any program that interacts with serial ports should
 - Be able to identify the ports that are actually available
@@ -25,6 +49,165 @@ Note that when you create an EISerialPortSelectionController object you specify 
 The _portSelectionController maintains a list of the available ports as well as a couple of other lists which make it easy to fill out GUI selection controls. To get an alphabetically sorted list of ports you could use the following
 
 	NSArray *ports = [_portSelectionController availablePorts];
+
+You can select a port by asking for it by name. You should then set its delegate. The previously selected port will have its delegate set to nil automatically.
+
+	[_portSelectionController selectPortWithName:@"name_of_one_of_the_ports"];
+	[[_portSelectionController selectedPort] setDelegate:self];
+
+The methods that must be implemented inorder to conform to the EISerialPortSelectionManagerDelegate protocol are
+
+	- (void) availablePortsListDidChange;
+	- (void) selectedSerialPortDidChange;
+	
+The *availablePortsListDidChange* method is called whenever a port is added or removed from the computer (for instance if a USB to serial adaptor is plugged or unplugged). Your controller should request the updated list of ports from the EISerialPortSelectionManager object and then update any of the GUI selection controls that are visible to the user.
+
+The *selectedSerialPortDidChange* method is called when the EISerialPortSelectionManager has changed the selected port. Here again your controller needs to consult the EISerialPortSelectionManager, find out which port is currently selected and update any selection controls. If there is no selection the selectedPort: method will return nil.
+
+
+## Opening a port
+
+A port can either be opened in a blocking or non-blocking manner
+
+    BOOL successful = [port openByBlocking]; 
+    \\ blocks execution until port is open, could take several seconds
+    
+    [port open];           
+    \\ returns immediately, port will be opened shortly after
+    
+	BOOL isPortOpen = [port isOpen];
+
+Your controller needs to implement the following delegate methods
+
+    - (void) serialPortDidOpen:(EISerialPort *)serialPort;
+    - (void) serialPort:(EISerialPort *)serialPort  failedToOpenWithError:(NSError *) anError; \\ Should this return an NSError???
+   
+Your UI should make it clear whether the selected port is open or not. If a port fails to open then a decent description of the failure should be presented to the user.
+
+
+## Changing settings
+
+The serial port settings can be modified using Objective-C code. The settings changes can be called individually or batched together. Batching settings changes using the startModifyingSettings and finishModifyingSettings method calls allows multiple settings to be modified without reaching into the kernel multiple times.
+
+	// Individual setting change
+	[port setBaudRate:@19200];
+	// Baud rate is changed immediately
+
+	// Batch settings changes
+	[port startModifyingSettings];
+		[port setRawMode];
+		[port setMinBytesPerRead:1];
+		[port setTimeout:10];
+		[port setBaudRate:@19200];
+		[port setFlowControl:EIFlowControlXonXoff];
+		[port setOneStopBit];
+		[port setDataBits:EIEightDataBits];
+		[port setParity:EIParityNone];
+	[port finishModifyingSettings];
+
+Settings changes are synchronised with write operations. This means that even though port opening, port settings and port IO commands happen asynchronously they never happen out of order (If you change the board rate and then send some text it will definitely be transmitted at the requested baud rate).
+
+    [port open];
+    
+    [port startModifyingSettings];
+    [port setBaudRate:@19200];
+    [port finishModifyingSettings];
+    
+    [port writeString:@"blah blah blah"]; \\ 19200 baud guaranteed
+    
+    [port startModifyingSettings];
+    [port setBaudRate:@2400];
+    [port finishModifyingSettings];
+    
+    [port writeString:@"do do do"];       \\ 2400 baud guaranteed
+ 
+Your controller should implement the following delegate method for dealing with settings changes.
+
+	- (void)serialPort:(EISerialPort *)serialPort didChangeSettings;
+
+
+## Reading from a port
+
+The simplest way to receive data from the serial port is to implement the 
+EISerialPortDelegate Protocol.
+
+	- (void)serialPort:(EISerialPort *)serialPort didReceiveData:(NSData *)data
+
+http://www.cocoawithlove.com/2008/06/five-approaches-to-listening-observing.html
+
+
+## Writing to a port
+
+There are a couple of ways to send characters out of the serial port to a micro.
+
+If you simply want to send a string of characters you can use the following method. This will do an asynchronous send, returning immediately.
+
+    [port sendString:@"blah blah blah"];
+    
+NSData objects can also be sent
+
+	char bytes[] = { 0x80 };
+    NSData *data = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)];
+    [port sendData:data];
+    
+
+Large bodies of characters can be sent with the kernel handling the caching. However there is little feedback or options for modifications to the text once they have been sent to the kernel. As such it is recommended that the sent data is spit into smaller chunks.
+
+    [port sendString:aLargeString inChunksSplitBy:@"\n"];
+    [port sendString:aLargeString inChunksOfSize:240];
+
+The functions that are used for sending data out of the serial port are asynchronous and return immediately after they are called. The serial port itself though requires a certain amount of time in which to pass each of the characters out to the wire. The EISerial framework provides a delegate call back when it thinks the message has been sent (there is no direct feedback from within the kernel). 
+
+	// Both of these delegate functions are called when we estimate that the
+	// data has been sent out of the serial port.
+	- (void) serialPortDidSendData:(NSData *)sentData ofLength:(uint)len;
+	- (void) serialPortDidSendString:(NSString *)sentString;
+
+This is not the whole story unfortunately. An attached device can also pause transmission via the various flow control mechanisms. The EISerial framework is unable to get feedback on these delays which would then make the feedback from the delegate methods above in accurate. As a result they are disabled unless the flow control setting is set to off.
+
+Sometimes it is required to have a delay between the sending of two chunks of data. Due to the asynchronous behaviour of the framework a special delay function is needed that inserts the delay in the correct spot in the transmit queue.
+
+    [port delayTransmissionForDuration:0.1];
+    
+You can also send a break command for a specified duration
+
+	[port sendBreak];
+	[port sendBreakForDuration:0.1];
+	
+Note: Delays should be specified as doubles of seconds using the NSTimeInterval type.
+
+#### Pausing Transmission
+
+At times it may be desirable to stop the output of characters from the serial port. EISerial allows you to pause and resume transmission. The other common operation is to flush the transmit buffer.
+
+In order to pause and resume transmission you can call the following functions
+
+	[port pause];
+	BOOL isPaused = [port isPaused];
+	[port flushTransmit];
+	[port resume];
+
+
+## Closing a port
+
+To close a port
+
+    [port close];
+    
+It is important that when a serial port is closed or removed that your code handles its own cleanup. This can be done in the delegate function
+
+    - (void)serialPortDidClose:(EISerialPort *)serialPort;
+    
+If a serial port is removed from the system e.g. if a USB to serial converter is unplugged, then the EISerial port object will be deleted from the system. Before deallocating itself it will call the serialPortWillBeRemovedFromSystem delegate method so that 3rd party code can perform its own cleanup.
+
+    - (void)serialPortWillBeRemovedFromSystem:(EISerialPort *)serialPort;
+
+If you do accidentally try to use a port that has been removed (prior to it being released by the system) the framework will not crash. It will simply ignore your request. *** Not sure how to do this.
+
+
+-----------------------------
+
+-----------------------------
 
 
 
@@ -139,19 +322,6 @@ The delegate method
    
 Provides a callback to alert your program when the port had been opened.
 
-To close a port
-
-    [port close];
-    
-It is important that when a serial port is closed or removed that your code handles its own cleanup. This can be done in the delegate function
-
-    - (void)serialPortDidClose:(EISerialPort *)serialPort;
-    
-If a serial port is removed from the system e.g. if a USB to serial converter is unplugged, then the EISerial port object will be deleted from the system. Before deallocating itself it will call the serialPortWillBeRemovedFromSystem delegate method so that 3rd party code can perform its own cleanup.
-
-    - (void)serialPortWillBeRemovedFromSystem:(EISerialPort *)serialPort;
-
-If you do accidentally try to use a port that has been removed (prior to it being released by the system) the framework will not crash. It will simply ignore your request. *** Not sure how to do this.
 
 ### Serial Port settings
 The serial port settings can be modified using Objective-C code. The settings changes can be called individually or batched together. Batching settings changes using the startModifyingSettings and finishModifyingSettings method calls allows multiple settings to be modified without reaching into the kernel multiple times.
@@ -197,87 +367,9 @@ The settings are also Key-Value Observer compliant so that they can be used with
 
 ### Sending data to a Serial Port
 
-There are a couple of ways to send characters out of the serial port to a micro.
-
-If you simply want to send a string of characters you can use the following method. This will do an asynchronous send, returning immediately.
-
-    [port sendString:@"blah blah blah"];
-    
-NSData objects can also be sent
-
-	char bytes[] = { 0x80 };
-    NSData *data = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)];
-    [port sendData:data];
-    
-
-Large bodies of characters can be sent with the kernel handling the caching. However there is little feedback or options for modifications to the text once they have been sent to the kernel. As such it is recommended that the sent data is spit into smaller chunks.
-
-    [port sendString:aLargeString inChunksSplitBy:@"\n"];
-    [port sendString:aLargeString inChunksOfSize:240];
-
-The functions that are used for sending data out of the serial port are asynchronous and return immediately after they are called. The serial port itself though requires a certain amount of time in which to pass each of the characters out to the wire. The EISerial framework provides a delegate call back when it thinks the message has been sent (there is no direct feedback from within the kernel). 
-
-	// Both of these delegate functions are called when we estimate that the
-	// data has been sent out of the serial port.
-	- (void) serialPortDidSendData:(NSData *)sentData ofLength:(uint)len;
-	- (void) serialPortDidSendString:(NSString *)sentString;
-
-This is not the whole story unfortunately. An attached device can also pause transmission via the various flow control mechanisms. The EISerial framework is unable to get feedback on these delays which would then make the feedback from the delegate methods above in accurate. As a result they are disabled unless the flow control setting is set to off.
-
-Sometimes it is required to have a delay between the sending of two chunks of data. Due to the asynchronous behaviour of the framework a special delay function is needed that inserts the delay in the correct spot in the transmit queue.
-
-    [port delayTransmissionForDuration:0.1];
-    
-You can also send a break command for a specified duration
-
-	[port sendBreak];
-	[port sendBreakForDuration:0.1];
-	
-Note: Delays should be specified as doubles of seconds using the NSTimeInterval type.
-
-#### Pausing Transmission
-
-At times it may be desirable to stop the output of characters from the serial port. EISerial allows you to pause and resume transmission. The other common operation is to flush the transmit buffer.
-
-In order to pause and resume transmission you can call the following functions
-
-	[port pause];
-	BOOL isPaused = [port isPaused];
-	[port flushTransmit];
-	[port resume];
-	
-
 
 ### Receiving data from a Serial Port
 
-The simplest way to receive data from the serial port is to implement the 
-EISerialPortDelegate Protocol.
-
-	- (void)serialPort:(EISerialPort *)serialPort didReceiveData:(NSData *)data
-
-
-EISerialPort objects can also broadcast the output from a serial port. You will need to have an object that complies to the EISerialPortDelegate Protocol. Instead of setting it as the delegate though you can register it as an observer. This allows you to also set a different queue in which the callback will be run.
-
-    [port registerObserver:myCustomObject1];
-    [port registerObserver:myCustomObject2 usingQueue:myCustomObjectQueue];
-
-Here is a pseudo code explanation of what EISerialPort does when it receives data from the serial port.
-
-	dispatch_async the following on the provided queue
-		Check if the receiving object is still valid
-		Check that it has the right function
-		Call the function with the data
-
-
-Implementation details for me
-
-    dispatch_async(myCustomObjectQueue, ^{
-    	if ([(id)myCustomObject2 respondsToSelector:@selector(serialPort:didReceiveData:)]){
-				[myCustomObject2 serialPort:self didReceiveData:data];
-			}
-    	});
-
-http://www.cocoawithlove.com/2008/06/five-approaches-to-listening-observing.html
 
 ## User Interface Controls
 

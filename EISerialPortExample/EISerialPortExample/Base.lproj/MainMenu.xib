@@ -726,7 +726,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="changeSerialPortSelection:" target="494" id="sVb-85-RpB"/>
+                            <action selector="openOrCloseSerialPort:" target="494" id="xCf-Cb-9B3"/>
                         </connections>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gwz-LQ-Fbi">
@@ -752,6 +752,7 @@
         </window>
         <customObject id="494" customClass="AppDelegate">
             <connections>
+                <outlet property="openOrCloseButton" destination="sdF-LL-SB5" id="oPV-HG-COD"/>
                 <outlet property="selectedPortNameLabel" destination="VxY-3p-a9M" id="83S-YO-auf"/>
                 <outlet property="serialPortSelectionPopUp" destination="3Yn-Tk-5ox" id="ynF-3z-Gpn"/>
                 <outlet property="window" destination="371" id="532"/>

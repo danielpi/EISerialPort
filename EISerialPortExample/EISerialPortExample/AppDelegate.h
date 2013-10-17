@@ -11,7 +11,7 @@
 #import "EISerialPortManager.h"
 #import "EISerialPortSelectionController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (readonly) EISerialPortManager *portManager;
@@ -19,10 +19,12 @@
 
 @property (weak) IBOutlet NSPopUpButton *serialPortSelectionPopUp;
 @property (weak) IBOutlet NSTextField *selectedPortNameLabel;
+@property (weak) IBOutlet NSButton *openOrCloseButton;
 
 - (IBAction) changeSerialPortSelection:(id)sender;
+- (IBAction) openOrCloseSerialPort:(id)sender;
 
-- (void) serialPortsListDidChange;
-- (void) serialPortSelectionDidChange;
+- (void) availablePortsListDidChange;
+- (void) selectedSerialPortDidChange;
 
 @end

@@ -24,15 +24,20 @@
 {
     NSString *selectedPortName = [[self.serialPortSelectionPopUp selectedItem] title];
     NSLog(@"Selected: %@", selectedPortName);
-    [_portSelectionController changeSelectionToPortNamed:selectedPortName];
+    
+    [[_portSelectionController selectedPort] setDelegate:nil];
+    [_portSelectionController selectPortWithName:selectedPortName];
+    
 }
 
 
-- (void) serialPortSelectionDidChange
+- (void) selectedSerialPortDidChange
 {
     NSString *selectedPortName;
     
     if (_portSelectionController.selectedPort != nil) {
+        [[_portSelectionController selectedPort] setDelegate:self];
+        
         selectedPortName = [_portSelectionController.selectedPort name];
         if ([[self.serialPortSelectionPopUp selectedItem] title] != selectedPortName) {
             [self.serialPortSelectionPopUp selectItemWithTitle:selectedPortName];
@@ -46,7 +51,7 @@
 }
 
 
-- (void) serialPortsListDidChange
+- (void) availablePortsListDidChange
 {
     [self.serialPortSelectionPopUp removeAllItems];
     
@@ -55,13 +60,28 @@
         BOOL portEnabled = [[portDetails valueForKey:@"enabled"] boolValue];
         [self.serialPortSelectionPopUp addItemWithTitle:portName];
         [[self.serialPortSelectionPopUp itemWithTitle:portName] setEnabled:portEnabled];
-        [self serialPortSelectionDidChange];
+        [self selectedSerialPortDidChange];
     }
 }
 
-- (void)serialPortWillBeRemovedFromSystem:(EISerialPort *)serialPort
+- (IBAction) openOrCloseSerialPort:(id)sender
 {
-    
+    if ([_portSelectionController.selectedPort isOpen]) {
+        [_portSelectionController.selectedPort close];
+    } else {
+        [_portSelectionController.selectedPort open];
+    }
 }
+
+- (void) serialPortDidOpen
+{
+    [self.openOrCloseButton setStringValue:@"Close"];
+}
+
+- (void) serialPortDidClose
+{
+    [self.openOrCloseButton setStringValue:@"Open"];
+}
+
 
 @end

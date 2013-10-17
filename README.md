@@ -52,8 +52,8 @@ The _portSelectionController maintains a list of the available ports as well as 
 
 You can select a port by asking for it by name. You should then set its delegate. The previously selected port will have its delegate set to nil automatically.
 
+	[[_portSelectionController selectedPort] setDelegate:nil]; // Disconnect from the port that was last used
 	[_portSelectionController selectPortWithName:@"name_of_one_of_the_ports"];
-	[[_portSelectionController selectedPort] setDelegate:self];
 
 The methods that must be implemented inorder to conform to the EISerialPortSelectionManagerDelegate protocol are
 
@@ -62,7 +62,7 @@ The methods that must be implemented inorder to conform to the EISerialPortSelec
 	
 The *availablePortsListDidChange* method is called whenever a port is added or removed from the computer (for instance if a USB to serial adaptor is plugged or unplugged). Your controller should request the updated list of ports from the EISerialPortSelectionManager object and then update any of the GUI selection controls that are visible to the user.
 
-The *selectedSerialPortDidChange* method is called when the EISerialPortSelectionManager has changed the selected port. Here again your controller needs to consult the EISerialPortSelectionManager, find out which port is currently selected and update any selection controls. If there is no selection the selectedPort: method will return nil.
+The *selectedSerialPortDidChange* method is called when the EISerialPortSelectionManager has changed the selected port. Here again your controller needs to consult the EISerialPortSelectionManager, find out which port is currently selected and update any selection controls. If there is no selection the selectedPort: method will return nil. When you implement this function you should set the serial ports delegate at this point.
 
 
 ## Opening a port
@@ -79,8 +79,8 @@ A port can either be opened in a blocking or non-blocking manner
 
 Your controller needs to implement the following delegate methods
 
-    - (void) serialPortDidOpen:(EISerialPort *)serialPort;
-    - (void) serialPort:(EISerialPort *)serialPort  failedToOpenWithError:(NSError *) anError; \\ Should this return an NSError???
+    - (void) serialPortDidOpen;
+    - (void) serialPortFailedToOpenWithError:(NSError *) anError; \\ Should this return an NSError???
    
 Your UI should make it clear whether the selected port is open or not. If a port fails to open then a decent description of the failure should be presented to the user.
 
@@ -123,7 +123,7 @@ Settings changes are synchronised with write operations. This means that even th
  
 Your controller should implement the following delegate method for dealing with settings changes.
 
-	- (void)serialPort:(EISerialPort *)serialPort didChangeSettings;
+	- (void) serialPortDidChangeSettings;
 
 
 ## Reading from a port
@@ -131,7 +131,7 @@ Your controller should implement the following delegate method for dealing with 
 The simplest way to receive data from the serial port is to implement the 
 EISerialPortDelegate Protocol.
 
-	- (void)serialPort:(EISerialPort *)serialPort didReceiveData:(NSData *)data
+	- (void) serialPortDidReceiveData:(NSData *)data
 
 http://www.cocoawithlove.com/2008/06/five-approaches-to-listening-observing.html
 
@@ -196,7 +196,7 @@ To close a port
     
 It is important that when a serial port is closed or removed that your code handles its own cleanup. This can be done in the delegate function
 
-    - (void)serialPortDidClose:(EISerialPort *)serialPort;
+    - (void) serialPortDidClose;
     
 If a serial port is removed from the system e.g. if a USB to serial converter is unplugged, then the EISerial port object will be deleted from the system. Before deallocating itself it will call the serialPortWillBeRemovedFromSystem delegate method so that 3rd party code can perform its own cleanup.
 

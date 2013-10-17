@@ -56,14 +56,13 @@ typedef enum {
 @protocol EISerialDelegate
 
 @optional
+
 - (void) serialPortDidOpen;
+- (void) serialPortFailedToOpen; // Should this return an NSError???
+- (void) serialPortDidChangeSettings;
+- (void) serialPortDidReceiveData:(NSData *)data;
 - (void) serialPortDidClose;
-- (void) serialPortReadData:(NSDictionary *)dataDictionary;
-- (void) willWriteData:(NSData *)data ofLength:(uint)len;
-- (void) didWriteData:(NSData *)sentData ofLength:(uint)len;
-- (void) didCancelWriteDataWithoutSendingRemainingData:(NSData *)unsentData;
-- (void) portSettingsWillChange;
-- (void) portSettingsDidChange;
+
 @end
 
 

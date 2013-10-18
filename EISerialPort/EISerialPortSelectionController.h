@@ -23,17 +23,12 @@
 extern NSString * const EISelectedSerialPortNameKey;
 
 
-@interface EISerialPortSelectionController : NSObject
 
+@interface EISerialPortSelectionController : NSObject
 
 @property (readwrite, unsafe_unretained) id delegate;
 @property (readonly, strong) NSString *label;
-
 @property (readonly, weak) EISerialPort *selectedPort;
-
-//@property (readonly) NSArray *availablePortsAlphabetical;
-//@property (readonly) NSArray *availablePortsByType;
-//@property (readonly) NSArray *popUpButtonDetails;
 
 - (id) initWithLabel:(NSString *)label;
 - (void) selectPortWithName:(NSString *)portName;

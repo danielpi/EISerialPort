@@ -40,6 +40,7 @@
 @property (readwrite) dispatch_queue_t sendQueue;
 @property (readwrite) dispatch_queue_t receiveQueue;
 @property (atomic, retain, readwrite) NSTimer *timer;
+@property (readonly) uint idealBufferSize;
 
 - (void) startModifyingSettings;
 - (void) finishModifyingSettings;
@@ -77,6 +78,8 @@
         CFRelease(ioKitReturn);
         _fileDescriptor = -1;
         
+        _idealBufferSize = 400;
+        
         _sendQueue = dispatch_queue_create("au.com.electronicinnovations.sendQueue", NULL);
         _receiveQueue = dispatch_queue_create("au.com.electronicinnovations.receiveQueue", NULL);
         _timer = [[NSTimer alloc] init];
@@ -87,10 +90,10 @@
 #pragma mark Properties
 - (BOOL)isOpen
 {
-    if (self.fileDescriptor != -1) {
-        return TRUE;
-    } else {
+    if (self.fileDescriptor == -1) {
         return FALSE;
+    } else {
+        return TRUE;
     }
 }
 
@@ -137,19 +140,17 @@
     NSArray *stopBitsLabels = @[ @"1", @"2"];
     NSArray *flowControlLabels = @[ @"None", @"XOFF", @"RTS"];
     
-    // @"usbSerial-1234 open 19200 8N1 XOFF"
-    theDescription = [[NSString alloc] initWithFormat:@"%@ %@ %@ %@%@%@ %@\n", _name, openOrClosed, self.baudRate.stringValue, dataBitsLabels[self.dataBits], parityLabels[self.parity], stopBitsLabels[self.stopBits], flowControlLabels[self.flowControl]];
+    if ([self isOpen]) {
+        // @"usbSerial-1234 <open 19200 8N1 XOFF>"
+        theDescription = [[NSString alloc] initWithFormat:@"%@ <%@ %@ %@%@%@ %@>\n", _name, openOrClosed, self.baudRate.stringValue, dataBitsLabels[self.dataBits], parityLabels[self.parity], stopBitsLabels[self.stopBits], flowControlLabels[self.flowControl]];
+    } else {
+        // @"usbSerial-1234 <closed>"
+        theDescription = [[NSString alloc] initWithFormat:@"%@ <%@>\n", _name, openOrClosed];
+    }
+    
+    
     return theDescription;
 }
-
-
-+ (NSArray *) standardBaudRates
-{
-    NSArray *baudRatesListed = @[ @0L, @50L, @75L, @110L, @134L, @150L, @200L, @300L, @600L, @1200L, @1800L, @2400L, @4800L, @7200L, @9600L, @14400L, @19200L, @28800L, @38400L, @57600L, @76800L, @115200L, @230400L, @460800L];
-    
-	return baudRatesListed;
-}
-
 
 
 - (NSString *) byteToBinaryString:(uint16)aByte
@@ -197,12 +198,12 @@
         
         if (self.fileDescriptor == -1)
         {
-            NSLog(@"Error opening serial port %s(%d).\n", strerror(errno), errno);
+            //NSLog(@"Error opening serial port %s(%d).\n", strerror(errno), errno);
             // Notify of failed attempt
             dispatch_async(dispatch_get_main_queue(), ^{
-                if ([self.delegate respondsToSelector:@selector(serialPortDidClose)])
+                if ([self.delegate respondsToSelector:@selector(serialPortFailedToOpen)])
                 {
-                    [self.delegate serialPortDidClose];
+                    [self.delegate serialPortFailedToOpen];
                 }
             });
             return;
@@ -219,19 +220,19 @@
             returnCode = ioctl(self.fileDescriptor, TIOCEXCL);
             if (returnCode == -1)
             {
-                NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+                //NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
             }
             
             returnCode = tcgetattr(self.fileDescriptor, &_originalAttributes);
             if (returnCode == -1)
             {
-                NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                //NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
             returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
             if (returnCode == -1)
             {
-                NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                //NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
             //Set the output options
@@ -242,9 +243,14 @@
             returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
             if (returnCode == -1)
             {
-                NSLog(@"Failed to modify attributes for %@", self);
-                NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                //NSLog(@"Failed to modify attributes for %@", self);
+                //NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
+            
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            [self startModifyingAttributes];
+            [self setBaudRate:[defaults objectForKey:@"baudRate"]];
+            [self finishModifyingAttributes];
             
             [self setupReceiveThread];
         }
@@ -263,22 +269,22 @@
             sleep(0.2);
             //[self suspendWriting];
             
-            NSLog(@"%@ is being closed",[self name]);
+            //NSLog(@"%@ is being closed",[self name]);
             // flush all input and output.
             // Note that this call is simply passed on to the serial device driver.
             // See tcsendbreak(3) ("man 3 tcsendbreak") for details.
             if (tcflush([self fileDescriptor], TCIOFLUSH) == -1)
             {
                 //@throw serialException;
-                printf("Error waiting for drain - %s(%d).\n",
-                       strerror(errno), errno);
+                //printf("Error waiting for drain - %s(%d).\n",
+                //       strerror(errno), errno);
             }
             
             //Re-allow other processes access to the serial Port
             if (ioctl([self fileDescriptor], TIOCNXCL) == -1)
             {
                 //@throw serialException;
-                NSLog(@"Error opening TIOCNXCL on %@ - %s(%d).\n", [self name], strerror(errno), errno);
+                //NSLog(@"Error opening TIOCNXCL on %@ - %s(%d).\n", [self name], strerror(errno), errno);
             }
             
             // It is good practice to reset a serial port back to the state in
@@ -294,7 +300,7 @@
             
             
             close([self fileDescriptor]);
-            self.fileDescriptor = 0;
+            self.fileDescriptor = -1;
             dispatch_async(dispatch_get_main_queue(), ^{
                 if ([self.delegate respondsToSelector:@selector(serialPortDidClose)])
                 {
@@ -316,8 +322,8 @@
         returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
         if (returnCode == -1)
         {
-            NSLog(@"Failed to read attributes for %@", self);
-            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            //NSLog(@"Failed to read attributes for %@", self);
+            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
         }
     } );
 }
@@ -331,9 +337,9 @@
         returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
         if (returnCode == -1)
         {
-            NSLog(@"Failed to modify attributes for %@", self);
-            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
-            NSLog(@"Error setting tty attributes in endModifyingAttributes %s(%d).\n", strerror(errno), errno);
+            //NSLog(@"Failed to modify attributes for %@", self);
+            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            //NSLog(@"Error setting tty attributes in endModifyingAttributes %s(%d).\n", strerror(errno), errno);
         }
     } );
 }
@@ -347,8 +353,8 @@
         returnCode = tcsetattr(self.fileDescriptor, TCSAFLUSH, &_originalAttributes);
         if (returnCode == -1)
         {
-            NSLog(@"Failed to modify attributes for %@", self);
-            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            //NSLog(@"Failed to modify attributes for %@", self);
+            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
         }
     } );
 }
@@ -363,7 +369,7 @@
     returnCode = tcgetattr([self fileDescriptor], &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Error getting tty attributes in getBaudRate");
+        //NSLog(@"Error getting tty attributes in getBaudRate");
         return [NSNumber numberWithInt:returnCode];
     }
     baudRate = [NSNumber numberWithLong:cfgetispeed(&currentAttributes)];
@@ -378,6 +384,9 @@
         cfsetispeed(&_modifiedAttributes, [baudRate longValue]);
         cfsetospeed(&_modifiedAttributes, [baudRate longValue]);
     } );
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:baudRate forKey:@"baudRate"];
 }
 
 
@@ -392,7 +401,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     //
@@ -443,7 +452,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     if (currentAttributes.c_cflag & PARENB) {
@@ -487,7 +496,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     return currentAttributes.c_cc[VMIN];
@@ -510,7 +519,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     return currentAttributes.c_cc[VTIME];
@@ -546,7 +555,7 @@
 
 
 // [serialPort setStopBits:EIStopbitsOne];
--(NSNumber *)stopBits
+-(EISerialStopBits)stopBits
 {
     int returnCode;
     struct termios currentAttributes;
@@ -554,24 +563,24 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     if (currentAttributes.c_cflag & CSTOPB) {
-        return [NSNumber numberWithInt:2];
+        return EIStopbitsTwo;
     } else {
-        return [NSNumber numberWithInt:1];
+        return EIStopbitsOne;
     }
 }
 
--(void)setStopBits:(NSNumber *)stopBits
+-(void)setStopBits:(EISerialStopBits)stopBits
 {
-    if ([stopBits isEqualToNumber:[NSNumber numberWithInt:1]]) {
+    if (stopBits == EIStopbitsOne) {
         [self setOneStopBit];
-    } else if ([stopBits isEqualToNumber:[NSNumber numberWithInt:1]]) {
+    } else if (stopBits == EIStopbitsTwo) {
         [self setTwoStopBits];
     } else {
-        NSLog(@"Stopbits our of range:%@",stopBits);
+        // Flag an error
     }
 }
 
@@ -599,7 +608,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        NSLog(@"Failed to read attributes for %@", self);
+        //NSLog(@"Failed to read attributes for %@", self);
     }
     
     EI_c_cflag = currentAttributes.c_cflag & CSIZE;
@@ -643,6 +652,42 @@
                 break;
         }
     } );
+}
+
+- (NSArray *)standardBaudRates
+{
+    return @[ @0L, @50L, @75L, @110L, @134L, @150L, @200L, @300L, @600L, @1200L, @1800L, @2400L, @4800L, @7200L, @9600L, @14400L, @19200L, @28800L, @38400L, @57600L, @76800L, @115200L, @230400L, @460800L];
+}
+
+- (NSArray *)baudRateLabels
+{
+    NSMutableArray *labels = [[NSMutableArray alloc] initWithCapacity:24];
+    
+    for (NSNumber *baudRate in self.standardBaudRates) {
+        [labels addObject:baudRate.stringValue];
+    }
+    
+    return labels;
+}
+
+- (NSArray *)parityLabels
+{
+    return @[ @"None", @"Odd", @"Even" ];
+}
+
+- (NSArray *)stopBitLabels
+{
+    return @[ @"1", @"2" ];
+}
+
+- (NSArray *)dataBitLabels
+{
+    return @[ @"5", @"6", @"7", @"8" ];
+}
+
+- (NSArray *)flowControlLabels
+{
+    return @[ @"None", @"XOFF", @"RTS" ];
 }
 
 
@@ -844,8 +889,11 @@
             int returnCode = ioctl(self.fileDescriptor, TIOCOUTQ, &ioctlBytestInBuffer);
             if (returnCode == -1)
             {
-                NSLog(@"Error setting TIOCOUTQ on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+                //NSLog(@"Error setting TIOCOUTQ on %@ - %s(%d).\n", self.name, strerror(errno), errno);
             }
+            
+            roomInBuffer = self.idealBufferSize - ioctlBytestInBuffer;
+            roomInBuffer = roomInBuffer > self.idealBufferSize ? self.idealBufferSize : roomInBuffer;
             
             numberOfBytesToSend = (uint)MIN(roomInBuffer, ((uint)[dataToSend length] - bytesSent));
             //NSLog(@"Number of Bytes in Buffer:%d Room in Buffer:%d Number of Bytes to send:%d",ioctlBytestInBuffer, roomInBuffer, numberOfBytesToSend);
@@ -854,7 +902,7 @@
                 toBeSent = [dataToSend subdataWithRange:NSMakeRange(bytesSent, numberOfBytesToSend)];
                 numBytes = write(self.fileDescriptor, [toBeSent bytes], [toBeSent length]);
                 if (numBytes == -1) {
-                    NSLog(@"Write Error:%s", strerror( errno ));
+                    //NSLog(@"Write Error:%s", strerror( errno ));
                     usleep(10000000);
                 } else {
                     bytesSent = bytesSent + numBytes;

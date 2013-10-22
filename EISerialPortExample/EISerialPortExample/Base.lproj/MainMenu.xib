@@ -650,14 +650,15 @@
         <window title="EISerialPortExample" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="371">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="480" height="360"/>
+            <rect key="contentRect" x="335" y="390" width="499" height="360"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <value key="minSize" type="size" width="500" height="360"/>
             <view key="contentView" id="372">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
+                <rect key="frame" x="0.0" y="0.0" width="499" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Yn-Tk-5ox">
-                        <rect key="frame" x="18" y="316" width="197" height="26"/>
+                    <popUpButton verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Yn-Tk-5ox">
+                        <rect key="frame" x="92" y="316" width="390" height="26"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="Select Port" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="a1h-mO-JCT" id="SJf-bT-eRy">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -674,21 +675,21 @@
                             <action selector="changeSerialPortSelection:" target="494" id="ehK-Zs-Smv"/>
                         </connections>
                     </popUpButton>
-                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4ng-gS-tij">
-                        <rect key="frame" x="20" y="20" width="440" height="252"/>
+                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4ng-gS-tij">
+                        <rect key="frame" x="20" y="20" width="459" height="252"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <clipView key="contentView" ambiguous="YES" misplaced="YES" id="QmS-op-wm0">
-                            <rect key="frame" x="1" y="1" width="438" height="250"/>
+                        <clipView key="contentView" id="QmS-op-wm0">
+                            <rect key="frame" x="1" y="1" width="457" height="250"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textView ambiguous="YES" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="1et-sN-Qhq">
-                                    <rect key="frame" x="0.0" y="0.0" width="438" height="250"/>
+                                <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="1et-sN-Qhq">
+                                    <rect key="frame" x="0.0" y="0.0" width="457" height="250"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="438" height="250"/>
+                                    <size key="minSize" width="457" height="250"/>
                                     <size key="maxSize" width="463" height="10000000"/>
                                     <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="438" height="250"/>
+                                    <size key="minSize" width="457" height="250"/>
                                     <size key="maxSize" width="463" height="10000000"/>
                                 </textView>
                             </subviews>
@@ -699,27 +700,109 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" id="BXX-rx-mzd">
-                            <rect key="frame" x="423" y="1" width="16" height="250"/>
+                            <rect key="frame" x="442" y="1" width="16" height="250"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mmt-4u-XvQ">
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Mmt-4u-XvQ">
                         <rect key="frame" x="19" y="288" width="73" height="15"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="70" id="GUW-oN-QiL"/>
+                        </constraints>
                         <popUpButtonCell key="cell" type="push" title="Baud Rate" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="pzs-1S-UOV" id="yFS-3X-0Ud">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="miniSystem"/>
                             <menu key="menu" title="OtherViews" id="JMl-WR-i4Y">
                                 <items>
                                     <menuItem title="Baud Rate" state="on" id="pzs-1S-UOV"/>
-                                    <menuItem title="Item 2" id="lmV-lm-41W"/>
-                                    <menuItem title="Item 3" id="Ylc-sC-aXW"/>
                                 </items>
                             </menu>
                         </popUpButtonCell>
+                        <connections>
+                            <action selector="changeBaudRate:" target="494" id="DpV-C0-lN7"/>
+                        </connections>
                     </popUpButton>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sdF-LL-SB5">
-                        <rect key="frame" x="126" y="278" width="92" height="32"/>
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="S9e-9i-OhP">
+                        <rect key="frame" x="97" y="288" width="68" height="15"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="65" id="HT0-DP-zh1"/>
+                        </constraints>
+                        <popUpButtonCell key="cell" type="push" title="Data Bits" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="F0W-DT-mJI" id="J6I-RM-Jg9">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="miniSystem"/>
+                            <menu key="menu" title="OtherViews" id="svn-1m-fvy">
+                                <items>
+                                    <menuItem title="Data Bits" state="on" id="F0W-DT-mJI"/>
+                                    <menuItem title="7" id="c2D-Aj-vFI"/>
+                                    <menuItem title="8" id="HlX-Qe-6pa"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="changeDataBits:" target="494" id="OIp-KR-Wvu"/>
+                        </connections>
+                    </popUpButton>
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="s1C-Mg-Kxz">
+                        <rect key="frame" x="170" y="288" width="58" height="15"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" title="Parity" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="lyD-ez-Tei" id="xBk-tb-Cd5">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="miniSystem"/>
+                            <menu key="menu" title="OtherViews" id="Tcx-g1-J0y">
+                                <items>
+                                    <menuItem title="Parity" state="on" id="lyD-ez-Tei"/>
+                                    <menuItem title="None" id="UOZ-9Y-s4U"/>
+                                    <menuItem title="Odd" id="KOV-j2-Gg0"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="changeParity:" target="494" id="Awv-bE-wLu"/>
+                        </connections>
+                    </popUpButton>
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4Hk-OR-Yd8">
+                        <rect key="frame" x="233" y="288" width="71" height="15"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" title="Stop Bits" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="ZqM-jF-sHZ" id="XSB-nE-1s7">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="miniSystem"/>
+                            <menu key="menu" title="OtherViews" id="1eJ-qb-8Bd">
+                                <items>
+                                    <menuItem title="Stop Bits" state="on" id="ZqM-jF-sHZ"/>
+                                    <menuItem title="1" id="5gz-92-NYZ"/>
+                                    <menuItem title="2" id="fyX-c7-eUA"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="changeStopBits:" target="494" id="hOu-lP-iuk"/>
+                        </connections>
+                    </popUpButton>
+                    <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DPM-w0-lsw">
+                        <rect key="frame" x="309" y="288" width="84" height="15"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="81" id="pPq-1H-JJp"/>
+                        </constraints>
+                        <popUpButtonCell key="cell" type="push" title="Flow Control" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="DWO-S1-BUc" id="B31-yX-cd0">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="miniSystem"/>
+                            <menu key="menu" title="OtherViews" id="Kss-OK-Ufr">
+                                <items>
+                                    <menuItem title="Flow Control" state="on" id="DWO-S1-BUc"/>
+                                    <menuItem title="None" id="Jei-qV-ShU"/>
+                                    <menuItem title="XOFF" id="Orf-Ni-hEl"/>
+                                </items>
+                            </menu>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="changeFlowControl:" target="494" id="19x-T8-P4a"/>
+                        </connections>
+                    </popUpButton>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sdF-LL-SB5">
+                        <rect key="frame" x="393" y="278" width="92" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rUv-y4-qeb">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -729,32 +812,49 @@
                             <action selector="openOrCloseSerialPort:" target="494" id="xCf-Cb-9B3"/>
                         </connections>
                     </button>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gwz-LQ-Fbi">
-                        <rect key="frame" x="259" y="323" width="90" height="17"/>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DJh-gy-jQU">
+                        <rect key="frame" x="17" y="321" width="72" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Selected Port:" id="guj-nz-kwY">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                    </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VxY-3p-a9M">
-                        <rect key="frame" x="351" y="323" width="112" height="17"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Port Name" id="Z6J-cB-PVn">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Serial Port:" id="AVh-Dn-piN">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="DPM-w0-lsw" firstAttribute="leading" secondItem="4Hk-OR-Yd8" secondAttribute="trailing" constant="8" symbolic="YES" id="0ge-b4-1S7"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="top" secondItem="sdF-LL-SB5" secondAttribute="bottom" constant="13" id="1Bc-5D-r78"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="leading" secondItem="Mmt-4u-XvQ" secondAttribute="leading" id="4NJ-4P-Z6c"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="trailing" secondItem="sdF-LL-SB5" secondAttribute="trailing" id="6Li-W5-178"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="top" secondItem="372" secondAttribute="top" constant="88" id="8eY-eV-QMm"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="centerY" secondItem="s1C-Mg-Kxz" secondAttribute="centerY" id="920-CJ-ggO"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="leading" secondItem="372" secondAttribute="leading" constant="20" symbolic="YES" id="D2S-cH-fId"/>
+                    <constraint firstAttribute="bottom" secondItem="4ng-gS-tij" secondAttribute="bottom" constant="20" symbolic="YES" id="L7x-OF-aUl"/>
+                    <constraint firstAttribute="trailing" secondItem="4ng-gS-tij" secondAttribute="trailing" constant="20" symbolic="YES" id="R4X-Kr-mkG"/>
+                    <constraint firstItem="S9e-9i-OhP" firstAttribute="leading" secondItem="Mmt-4u-XvQ" secondAttribute="trailing" constant="8" symbolic="YES" id="Rin-L3-tkE"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="centerY" secondItem="sdF-LL-SB5" secondAttribute="centerY" id="VxS-Jh-9cE"/>
+                    <constraint firstItem="4Hk-OR-Yd8" firstAttribute="leading" secondItem="s1C-Mg-Kxz" secondAttribute="trailing" constant="8" symbolic="YES" id="XHv-C2-klD"/>
+                    <constraint firstItem="s1C-Mg-Kxz" firstAttribute="leading" secondItem="S9e-9i-OhP" secondAttribute="trailing" constant="8" symbolic="YES" id="XhW-4H-XzT"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="centerY" secondItem="4Hk-OR-Yd8" secondAttribute="centerY" id="aQQ-P7-tvv"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="top" secondItem="DJh-gy-jQU" secondAttribute="bottom" constant="18" id="fZ8-4H-Dap"/>
+                    <constraint firstItem="S9e-9i-OhP" firstAttribute="top" secondItem="3Yn-Tk-5ox" secondAttribute="bottom" constant="16" id="ghF-Pi-QKv"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="centerY" secondItem="DPM-w0-lsw" secondAttribute="centerY" id="ugF-Rc-xhc"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="leading" secondItem="DJh-gy-jQU" secondAttribute="leading" id="uo9-GM-8Eb"/>
+                    <constraint firstItem="4ng-gS-tij" firstAttribute="trailing" secondItem="3Yn-Tk-5ox" secondAttribute="trailing" id="vcI-z6-0N2"/>
+                    <constraint firstItem="Mmt-4u-XvQ" firstAttribute="centerY" secondItem="S9e-9i-OhP" secondAttribute="centerY" id="xWT-RW-hOj"/>
+                </constraints>
             </view>
         </window>
         <customObject id="494" customClass="AppDelegate">
             <connections>
+                <outlet property="baudRatePopUp" destination="Mmt-4u-XvQ" id="k3T-04-QVd"/>
+                <outlet property="dataBitsPopUp" destination="S9e-9i-OhP" id="sdf-7K-t8u"/>
+                <outlet property="flowControlPopUp" destination="DPM-w0-lsw" id="a2o-AU-KfK"/>
                 <outlet property="openOrCloseButton" destination="sdF-LL-SB5" id="oPV-HG-COD"/>
-                <outlet property="selectedPortNameLabel" destination="VxY-3p-a9M" id="83S-YO-auf"/>
+                <outlet property="parityPopUp" destination="s1C-Mg-Kxz" id="blA-Rm-rSh"/>
                 <outlet property="serialPortSelectionPopUp" destination="3Yn-Tk-5ox" id="ynF-3z-Gpn"/>
+                <outlet property="stopBitsPopUp" destination="4Hk-OR-Yd8" id="PZi-EO-xPD"/>
                 <outlet property="window" destination="371" id="532"/>
             </connections>
         </customObject>

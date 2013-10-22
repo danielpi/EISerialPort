@@ -61,6 +61,14 @@ typedef enum {
 @property (nonatomic, readwrite) EISerialStopBits stopBits;
 @property (nonatomic, readwrite) EISerialDataBits dataBits;
 @property (nonatomic, readwrite) EISerialFlowControl flowControl;
+
+@property (readonly) NSArray *standardBaudRates;
+@property (readonly) NSArray *baudRateLabels;
+@property (readonly) NSArray *parityLabels;
+@property (readonly) NSArray *stopBitLabels;
+@property (readonly) NSArray *dataBitLabels;
+@property (readonly) NSArray *flowControlLabels;
+
 @property (nonatomic, readwrite) uint minBytesPerRead;
 @property (nonatomic, readwrite) uint timeout;
 
@@ -89,6 +97,7 @@ typedef enum {
 - (void) delayTransmissionForDuration:(NSTimeInterval)seconds;
 - (void) sendBreak;
 - (void) sendBreakForDuration:(NSTimeInterval)seconds;
+
 - (void) cancelCurrentTransmission;
 
 @end

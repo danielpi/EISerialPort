@@ -58,9 +58,9 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     
     if ([defaultPort isNotEqualTo:nil]) {
         [self selectPortWithName:selectedPortName];
-        NSLog(@"Default port %@ selected", selectedPortName);
+        //NSLog(@"Default port %@ selected", selectedPortName);
     } else {
-        NSLog(@"Default port %@ not available", selectedPortName);
+        //NSLog(@"Default port %@ not available", selectedPortName);
     }
 }
 
@@ -70,12 +70,15 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
                        context:(void *)context
 {
     
-    NSLog(@"Object:%@ keyPath:%@ were observed", object, keyPath);
+    //NSLog(@"Object:%@ keyPath:%@ were observed", object, keyPath);
     
     if ([keyPath isEqual:@"availablePorts"]) {
-        //[self serialPortsListDidChange];
-        if ( [_delegate respondsToSelector:@selector(availablePortsListDidChange)] ) {
+        if ([_delegate respondsToSelector:@selector(availablePortsListDidChange)] ) {
             [_delegate availablePortsListDidChange];
+        }
+        // Check to see if the currently selected port has been removed
+        if (![_portManager.availablePorts containsObject:self.selectedPort]) {
+            [self selectPortWithName:nil];
         }
     }
     /*

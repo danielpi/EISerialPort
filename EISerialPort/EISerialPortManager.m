@@ -116,7 +116,7 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
 - (void) addAvailablePortsObject:(EISerialPort *)port
 {
     [_availablePorts addObject:port];
-    NSLog(@"Added %@", port);
+    //NSLog(@"Added %@", port);
     //[[NSNotificationCenter defaultCenter] postNotificationName:@"EISerialPortAdded"
     //                                                    object:self];
 }
@@ -124,7 +124,7 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
 - (void) removeAvailablePortsObject:(EISerialPort *)port
 {
     [_availablePorts removeObject:port];
-    NSLog(@"Removed %@", port);
+    //NSLog(@"Removed %@", port);
     //[[NSNotificationCenter defaultCenter] postNotificationName:@"EISerialPortRemoved"
     //                                                    object:self];
 }

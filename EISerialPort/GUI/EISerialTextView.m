@@ -174,7 +174,7 @@ NSString *EIDidPartialWriteData = @"EIDidPartialWriteData";
     const unichar BS = 8;
     const unichar DEL = 127;
     
-    [serialPort setWritingCancelled:NO];
+    //[serialPort setWritingCancelled:NO];
     
     // Intercept the keyDown event so that we can send the character to the serial port instead.
     NSString *input = [theEvent characters];
@@ -187,7 +187,7 @@ NSString *EIDidPartialWriteData = @"EIDidPartialWriteData";
         default:
             break;
     }
-	[serialPort writeString:input];
+	[serialPort sendString:input];
     
 }
 
@@ -214,7 +214,7 @@ NSString *EIDidPartialWriteData = @"EIDidPartialWriteData";
         }
     }
     if (toSend) {
-        [serialPort writeString:toSend];
+        [serialPort sendString:toSend];
         [toSend setString:@""];
     }
 }
@@ -223,7 +223,7 @@ NSString *EIDidPartialWriteData = @"EIDidPartialWriteData";
 {
 	NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
 	
-    [serialPort setWritingCancelled:NO];
+    //[serialPort setWritingCancelled:NO];
     
 	if ([[pasteBoard types] containsObject:@"NSStringPboardType"])
 	{

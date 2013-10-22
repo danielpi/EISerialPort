@@ -136,7 +136,7 @@ EISerialPortDelegate Protocol.
 http://www.cocoawithlove.com/2008/06/five-approaches-to-listening-observing.html
 
 
-## Writing to a port
+## Sending data out of a port
 
 There are a couple of ways to send characters out of the serial port to a micro.
 
@@ -176,16 +176,29 @@ You can also send a break command for a specified duration
 	
 Note: Delays should be specified as doubles of seconds using the NSTimeInterval type.
 
-#### Pausing Transmission
+#### Sending large amounts of data
 
-At times it may be desirable to stop the output of characters from the serial port. EISerial allows you to pause and resume transmission. The other common operation is to flush the transmit buffer.
+Sending large amounts of data, such as transferring an entire file, can have additional requirements compared to just sending keystrokes or a line or two. These requirements and challenges include
+- The data needs to be transfered as fast as possible
+- The progress of transfer should be displayed to the user
+- The user should be able to see that the transfer is continuing
+- The ability to cancel the transfer if something goes wrong is important
+- If something goes wrong you would like to know at which point in the transferred data the error occurred. (I can't do this at the moment)
 
-In order to pause and resume transmission you can call the following functions
+This is all made difficult by the fact that there are multiple buffers between your sending code and the actual serial line (USB caches, Bluetooth packets etc). 
 
-	[port pause];
-	BOOL isPaused = [port isPaused];
-	[port flushTransmit];
-	[port resume];
+To cancel the current transmission
+
+	[port cancelCurrentTransmission];
+	
+To see how much data is left to be transmitted
+
+    [port numberOfBytesInBuffer];
+    
+To see when characters are passed into the serial port implement the following delegate method. This is at the interface between the application and the operating system. So still all of the USB buffering to go through before the characters are on the wire.
+
+	- (void) serialPortDidSendData:(NSData *)sent;
+	
 
 
 ## Closing a port

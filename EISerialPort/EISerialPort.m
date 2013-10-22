@@ -249,7 +249,11 @@
             
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
             [self startModifyingAttributes];
-            [self setBaudRate:[defaults objectForKey:@"baudRate"]];
+            [self setBaudRate:[defaults objectForKey:[NSString stringWithFormat:@"%@-baudRate", self.name]]];
+            [self setDataBits:(EISerialDataBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-dataBits", self.name]] integerValue]];
+            [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
+            [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
+            [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
             [self finishModifyingAttributes];
             
             [self setupReceiveThread];
@@ -386,7 +390,7 @@
     } );
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:baudRate forKey:@"baudRate"];
+    [defaults setObject:baudRate forKey:[NSString stringWithFormat:@"%@-baudRate", self.name]];
 }
 
 
@@ -439,6 +443,8 @@
                 break;
         }
     } );
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[NSNumber numberWithInt:method] forKey:[NSString stringWithFormat:@"%@-flowControl", self.name]];
 }
 
 
@@ -485,6 +491,8 @@
                 break;
         }
     } );
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[NSNumber numberWithInt:parity] forKey:[NSString stringWithFormat:@"%@-parity", self.name]];
 }
 
 
@@ -582,6 +590,8 @@
     } else {
         // Flag an error
     }
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[NSNumber numberWithInt:stopBits] forKey:[NSString stringWithFormat:@"%@-stopBits", self.name]];
 }
 
 -(void)setOneStopBit
@@ -652,6 +662,8 @@
                 break;
         }
     } );
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[NSNumber numberWithInt:dataBits] forKey:[NSString stringWithFormat:@"%@-dataBits", self.name]];
 }
 
 - (NSArray *)standardBaudRates

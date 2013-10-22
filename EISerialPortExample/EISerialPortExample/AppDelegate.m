@@ -31,6 +31,13 @@
         
         [self.openOrCloseButton setTitle:@"Open"];
         [self.openOrCloseButton setEnabled:NO];
+        
+        [self.baudRatePopUp selectItemAtIndex:0];
+        [self.dataBitsPopUp selectItemAtIndex:0];
+        [self.parityPopUp selectItemAtIndex:0];
+        [self.stopBitsPopUp selectItemAtIndex:0];
+        [self.flowControlPopUp selectItemAtIndex:0];
+        
         [self.baudRatePopUp setEnabled:NO];
         [self.dataBitsPopUp setEnabled:NO];
         [self.parityPopUp setEnabled:NO];
@@ -130,24 +137,53 @@
 - (IBAction)changeDataBits:(id)sender
 {
     NSString *dataBitsString;
+    EISerialPort *currentPort;
+    NSUInteger dataBitsIndex;
     
-    dataBitsString = [[self.baudRatePopUp selectedItem] title];
+    dataBitsString = [[self.dataBitsPopUp selectedItem] title];
+    currentPort = _portSelectionController.selectedPort;
+    dataBitsIndex = [currentPort.dataBitLabels indexOfObject:dataBitsString];
     
+    [currentPort setDataBits:(EISerialDataBits)dataBitsIndex];
 }
 
 - (IBAction)changeParity:(id)sender
 {
+    NSString *parityString;
+    EISerialPort *currentPort;
+    NSUInteger parityIndex;
     
+    parityString = [[self.parityPopUp selectedItem] title];
+    currentPort = _portSelectionController.selectedPort;
+    parityIndex = [currentPort.parityLabels indexOfObject:parityString];
+    
+    [currentPort setParity:(EISerialParity)parityIndex];
 }
 
 - (IBAction)changeStopBits:(id)sender
 {
+    NSString *stopBitsString;
+    EISerialPort *currentPort;
+    NSUInteger stopBitsIndex;
     
+    stopBitsString = [[self.stopBitsPopUp selectedItem] title];
+    currentPort = _portSelectionController.selectedPort;
+    stopBitsIndex = [currentPort.stopBitLabels indexOfObject:stopBitsString];
+    
+    [currentPort setStopBits:(EISerialStopBits)stopBitsIndex];
 }
 
 - (IBAction)changeFlowControl:(id)sender
 {
+    NSString *flowControlString;
+    EISerialPort *currentPort;
+    NSUInteger flowControlIndex;
     
+    flowControlString = [[self.flowControlPopUp selectedItem] title];
+    currentPort = _portSelectionController.selectedPort;
+    flowControlIndex = [currentPort.flowControlLabels indexOfObject:flowControlString];
+    
+    [currentPort setFlowControl:(EISerialFlowControl)flowControlIndex];
 }
 
 

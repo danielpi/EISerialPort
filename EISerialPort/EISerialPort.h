@@ -12,8 +12,8 @@
 
 
 typedef enum {	
-	EIStopbitsOne           = 1,
-	EIStopbitsTwo           = 2
+	EIStopbitsOne           = 0,
+	EIStopbitsTwo           = 1
 } EISerialStopBits;
 
 typedef enum {	

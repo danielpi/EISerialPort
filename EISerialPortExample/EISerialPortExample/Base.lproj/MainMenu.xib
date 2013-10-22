@@ -855,6 +855,7 @@
                 <outlet property="parityPopUp" destination="s1C-Mg-Kxz" id="blA-Rm-rSh"/>
                 <outlet property="serialPortSelectionPopUp" destination="3Yn-Tk-5ox" id="ynF-3z-Gpn"/>
                 <outlet property="stopBitsPopUp" destination="4Hk-OR-Yd8" id="PZi-EO-xPD"/>
+                <outlet property="terminalView" destination="1et-sN-Qhq" id="hbg-gf-fMk"/>
                 <outlet property="window" destination="371" id="532"/>
             </connections>
         </customObject>

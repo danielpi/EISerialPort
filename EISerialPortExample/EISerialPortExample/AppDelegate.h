@@ -23,6 +23,7 @@
 @property (weak) IBOutlet NSPopUpButton *parityPopUp;
 @property (weak) IBOutlet NSPopUpButton *stopBitsPopUp;
 @property (weak) IBOutlet NSPopUpButton *flowControlPopUp;
+@property (unsafe_unretained) IBOutlet NSTextView *terminalView;
 
 - (IBAction)changeSerialPortSelection:(id)sender;
 - (IBAction)openOrCloseSerialPort:(id)sender;

@@ -231,7 +231,12 @@
     NSLog(@"Port Closed: %@", [_portSelectionController selectedPort]);
 }
 
-
+- (void) serialPortDidReceiveData:(NSData *)data
+{
+    NSString *receivedString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    
+    [self.terminalView insertText:receivedString];
+}
 
 
 @end

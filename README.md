@@ -218,9 +218,30 @@ If a serial port is removed from the system e.g. if a USB to serial converter is
 If you do accidentally try to use a port that has been removed (prior to it being released by the system) the framework will not crash. It will simply ignore your request. *** Not sure how to do this.
 
 
+## Adding a serial terminal to your app
+
+It should be easy to add a serial terminal to an app. Every app that does any sort of serial comms could benefit from having a serial terminal that allowed you to see the communications. Therefore the port must broadcast the comms characters to multiple objects within the app.
+
+It is also important to be able to control how the comms is displayed. Some options  are
+- VT100 style parsing
+- Raw bytes in and out
+- Packets wrapped as tokens
+
+
+
 -----------------------------
 
 -----------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -43,6 +43,7 @@ typedef enum {
 - (void) serialPortFailedToOpen; // Should this return an NSError???
 - (void) serialPortDidChangeSettings;
 - (void) serialPortDidReceiveData:(NSData *)data;
+- (void) serialPortDidSendData:(NSData *)data;
 - (void) serialPortDidClose;
 - (void) serialPortPinsDidChangeState;
 @end
@@ -96,7 +97,6 @@ typedef enum {
 - (void) sendData:(NSData *)dataToSend inChunksOfSize:(NSNumber *)chunkSize;
 - (void) delayTransmissionForDuration:(NSTimeInterval)seconds;
 - (void) sendBreak;
-- (void) sendBreakForDuration:(NSTimeInterval)seconds;
 
 - (void) cancelCurrentTransmission;
 

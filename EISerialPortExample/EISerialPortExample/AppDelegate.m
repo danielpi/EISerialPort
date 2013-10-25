@@ -16,6 +16,7 @@
     //_portManager = [EISerialPortManager sharedManager];
     _portSelectionController = [[EISerialPortSelectionController alloc] initWithLabel:@"window1"];
     [_portSelectionController setDelegate:self];
+    [_terminalView setDelegate:self];
     //NSLog(@"Port Manager:%@", _portManager);
 }
 
@@ -233,10 +234,20 @@
 
 - (void) serialPortDidReceiveData:(NSData *)data
 {
-    NSString *receivedString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    
-    [self.terminalView insertText:receivedString];
+    [self.terminalView appendCharacters:data];
 }
 
+
+#pragma mark EISerialTextViewDelegate
+
+- (void)receivedDataFromUser:(NSData *)data
+{
+    [self.portSelectionController.selectedPort sendData:data];
+}
+
+- (void)receivedStringFromUser:(NSString *)string
+{
+    [self.portSelectionController.selectedPort sendString:string];
+}
 
 @end

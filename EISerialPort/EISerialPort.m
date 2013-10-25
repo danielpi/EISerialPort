@@ -248,13 +248,13 @@
             }
             
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-            [self startModifyingAttributes];
+            [self startModifyingSettings];
             [self setBaudRate:[defaults objectForKey:[NSString stringWithFormat:@"%@-baudRate", self.name]]];
             [self setDataBits:(EISerialDataBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-dataBits", self.name]] integerValue]];
             [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
             [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
             [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
-            [self finishModifyingAttributes];
+            [self finishModifyingSettings];
             
             [self setupReceiveThread];
         }
@@ -318,7 +318,9 @@
 
 
 #pragma mark Settings
-- (void)startModifyingAttributes
+
+
+- (void) startModifyingSettings;
 {
     dispatch_async(self.sendQueue, ^ {
         int returnCode;
@@ -333,7 +335,7 @@
 }
 
 
-- (void)finishModifyingAttributes
+- (void) finishModifyingSettings;
 {
     dispatch_async(self.sendQueue, ^ {
         int returnCode;
@@ -879,14 +881,22 @@
 
 
 #pragma mark Writing
-- (void) writeString:(NSString *)aString
+- (void) sendString:(NSString *)aString
 {
     NSData *dataToSend = [aString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
-    [self writeData:dataToSend];
+    [self sendData:dataToSend];
+}
+- (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter
+{
+    
+}
+- (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
+{
+    
 }
 
 
-- (void) writeData:(NSData *)dataToSend
+- (void) sendData:(NSData *)dataToSend;
 {
     void (^writeData)(void);
     writeData = ^(void) {
@@ -930,18 +940,28 @@
     dispatch_async(self.sendQueue, writeData);
 }
 
-
-- (void) writeDelay:(uint)uSleep
+- (void) sendData:(NSData *)dataToSend inChunksOfSize:(NSNumber *)chunkSize
 {
-    dispatch_async(self.sendQueue, ^{ usleep(uSleep); });
+    
 }
 
+- (void) delayTransmissionForDuration:(NSTimeInterval)seconds
+{
+    dispatch_async(self.sendQueue, ^{ usleep((int)(1000000 * seconds)); });
+}
 
 -(void)sendBreak
 {
     //BOOL result = (tcsendbreak(fileDescriptor, 0) != -1);
     tcsendbreak(self.fileDescriptor, 0);
 }
+
+- (void) cancelCurrentTransmission
+{
+    
+}
+
+
 
 
 #pragma mark Reading
@@ -990,6 +1010,35 @@
 	});
 }
 
+/*
+ - (void)sendBulkText:(NSString *)stringToSend
+ {
+ NSScanner *scanner = [NSScanner scannerWithString:stringToSend];
+ [scanner setCharactersToBeSkipped:nil];
+ NSString *line = nil;
+ NSString *lineEndings = nil;
+ NSMutableString *toSend = [[NSMutableString alloc] initWithCapacity:100];
+ 
+ while (![scanner isAtEnd]) {
+ 
+ line = nil;
+ [scanner scanUpToCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:&line];
+ if (line) {
+ [toSend appendString:line];
+ }
+ 
+ lineEndings = nil;
+ [scanner scanCharactersFromSet:[NSCharacterSet newlineCharacterSet] intoString:&lineEndings];
+ if (lineEndings) {
+ [toSend appendString:@"\r\n"];
+ }
+ }
+ if (toSend) {
+ [serialPort sendString:toSend];
+ [toSend setString:@""];
+ }
+ }
+ */
 
 
 @end

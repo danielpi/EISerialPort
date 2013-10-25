@@ -8,10 +8,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "EISerialPort.h"
-#import "EISerialPortManager.h"
+#import "EISerialTextView.h"
 #import "EISerialPortSelectionController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialDelegate, EISerialTextViewDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (readonly, strong) EISerialPortSelectionController *portSelectionController;
@@ -23,7 +23,7 @@
 @property (weak) IBOutlet NSPopUpButton *parityPopUp;
 @property (weak) IBOutlet NSPopUpButton *stopBitsPopUp;
 @property (weak) IBOutlet NSPopUpButton *flowControlPopUp;
-@property (unsafe_unretained) IBOutlet NSTextView *terminalView;
+@property (unsafe_unretained) IBOutlet EISerialTextView *terminalView;
 
 - (IBAction)changeSerialPortSelection:(id)sender;
 - (IBAction)openOrCloseSerialPort:(id)sender;
@@ -35,5 +35,9 @@
 
 - (void)availablePortsListDidChange;
 - (void)selectedSerialPortDidChange;
+- (void)serialPortDidReceiveData:(NSData *)data;
+
+- (void)receivedDataFromUser:(NSData *)data;
+- (void)receivedStringFromUser:(NSString *)string;
 
 @end

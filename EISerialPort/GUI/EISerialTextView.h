@@ -7,39 +7,28 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "EISerialPort.h"
-#include <stdlib.h>
-#include <math.h>
-//#import "OverlayView.h"
+
+@class EISerialPort;
 
 
-@interface EISerialTextView : NSTextView <EISerialDelegate>
-{
-    __weak EISerialPort *serialPort;
-    NSCharacterSet *controlCharactersSet;
-    NSRange terminalInsertionPoint;
-    uint numBytesToSend;
-    uint numBytesRemaining;
-    //OverlayView *overlayView;
-    NSFileHandle *outputFile;
-}
+@protocol EISerialTextViewDelegate
 
-@property (weak) EISerialPort *serialPort;
-@property (strong) NSCharacterSet *controlCharactersSet;
-@property NSRange terminalInsertionPoint;
-@property (readwrite, strong) NSDate *xoffTime;
-@property (readwrite, strong) NSTimer *scrollCoalesenceTimer;
-@property (readwrite, atomic) BOOL *pauseDisplay;
-
-- (void) keyDown:(NSEvent *)theEvent;
-- (void) serialPortReadData:(NSDictionary *)dataDictionary;
-- (NSString *) processStringPortion:(NSString *)inputString;
-- (void) willWriteData:(NSData *)data ofLength:(uint)len;
-- (void) didPartialWriteData:(NSData *)sentData ofLength:(uint)len;
-- (void) didWriteData:(NSData *)sentData ofLength:(uint)len;
-- (void) didCancelWriteDataWithoutSendingRemainingData:(NSData *)unsentData;
-
-
+@optional
+- (void)receivedDataFromUser:(NSData *)data;
+- (void)receivedStringFromUser:(NSString *)string;
 @end
 
-extern NSString *EIDidPartialWriteData;
+
+@interface EISerialTextView : NSTextView
+
+@property (readwrite, weak) id delegate;
+
+- (void)keyDown:(NSEvent *)theEvent;
+- (void)paste:(id)sender;
+
+- (void)appendCharacters:(NSData *)characters;
+
+// EISerialDelegate
+//- (void) serialPortDidReceiveData:(NSData *)data;
+//- (void) serialPortDidSendData:(NSData *)data;
+@end

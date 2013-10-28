@@ -75,6 +75,8 @@
     [[self enclosingScrollView] setLineScroll:50.0];
     [[self enclosingScrollView] setPageScroll:100.0];
     
+    [self setContinuousSpellCheckingEnabled:NO];
+    
     _caretColor = [NSColor colorWithCalibratedHue:0.84 saturation:0.5 brightness:1.0 alpha:1.0 ];
     // caretColor = [NSColor colorWithCalibratedHue:0.0 saturation:0.0 brightness:0.0 alpha:0.3 ]; // Dulled out
     

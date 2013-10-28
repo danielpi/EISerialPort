@@ -111,6 +111,7 @@
 
 - (IBAction) openOrCloseSerialPort:(id)sender
 {
+    NSLog(@"Open Or Close");
     if ([_portSelectionController.selectedPort isOpen]) {
         [_portSelectionController.selectedPort close];
     } else {
@@ -235,6 +236,11 @@
 - (void) serialPortDidReceiveData:(NSData *)data
 {
     [self.terminalView appendCharacters:data];
+}
+
+- (void) serialPortExperiencedAnError:(NSError *)anError
+{
+    [[self window] presentError:anError];
 }
 
 

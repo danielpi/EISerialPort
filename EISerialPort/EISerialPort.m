@@ -7,21 +7,9 @@
 //
 
 #import "EISerialPort.h"
-// #import <Foundation/Foundation.h>
-// #import <Cocoa/Cocoa.h>
-// #include <CoreFoundation/CoreFoundation.h>
-
-// #include <stdio.h>
-// #include <string.h>
-// #include <unistd.h>
-// #include <fcntl.h>
-// #include <errno.h>
-// #include <paths.h>
-// #include <termios.h>
-// #include <sysexits.h>
-// #include <sys/param.h>
-// #include <sys/event.h>
+#import "EISerialPortError.h"
 #include <sys/ioctl.h>
+#include <sys/errno.h>
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
@@ -46,7 +34,7 @@
 - (void) finishModifyingSettings;
 
 - (NSString *) byteToBinaryString:(uint16)aByte;
-- (void) openByBlocking;
+- (BOOL) openSynchronously:(NSError**)anError;
 
 - (BOOL) isEqual:(id)other;
 - (BOOL) isEqualToSerialPort:(EISerialPort *)aSerialPort;
@@ -59,13 +47,12 @@
 @implementation EISerialPort
 
 
-
-
 #pragma mark Lifecycle
 - (id) initWithIOObject:(io_object_t) iOObject
 {
 	self = [super init];
     if (self) {
+        _open = NO;
         _matchedMachPort = iOObject;
         CFTypeRef ioKitReturn;
         
@@ -88,15 +75,6 @@
 }
 
 #pragma mark Properties
-- (BOOL)isOpen
-{
-    if (self.fileDescriptor == -1) {
-        return FALSE;
-    } else {
-        return TRUE;
-    }
-}
-
 
 
 #pragma mark Comparison
@@ -175,38 +153,72 @@
     // Perform a normal non-blocking open operation
     //[self openAndNotifyObject:nil withSelector:nil];
     void (^openPort)(void);
-    openPort = ^ { [self openByBlocking]; };
+    openPort = ^ {
+        NSError *error = nil;
+        
+        BOOL success = [self openSynchronously:&error];
+        
+        if (!success) {
+            if ([self.delegate respondsToSelector:@selector(serialPortExperiencedAnError:)])
+            {
+                [self.delegate serialPortExperiencedAnError:error];
+            }
+        }
+    };
     
     dispatch_async([self sendQueue], openPort);
 }
 
 
-- (void) openByBlocking
+- (BOOL) openSynchronously:(NSError**)anError;
 {
     int returnCode;
     int connectAttempts = 2;
     //NSLog(@"Opening Port\n");
+    NSDictionary *userInfo;
+        
+    //NSDictionary *userInfo = @{
+    //                           NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
+    //                           NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"The operation timed out.", nil),
+    //                           NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Have you tried turning it off and on again?", nil)
+    //                          };
+    //NSError *error = [NSError errorWithDomain:NSHipsterErrorDomain
+    //                                     code:-57
+    //                                 userInfo:userInfo];
     
     if ([self isOpen]) {
-        return;
+        return YES;
     } else {
         while (connectAttempts > 0 & self.fileDescriptor == -1) {
             self.fileDescriptor = open([[self path] UTF8String], O_RDWR | O_NOCTTY | O_NDELAY);
-            //NSLog(@"Try again");
             connectAttempts = connectAttempts - 1;
         }
-        
         if (self.fileDescriptor == -1)
         {
-            //NSLog(@"Error opening serial port %s(%d).\n", strerror(errno), errno);
-            // Notify of failed attempt
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if ([self.delegate respondsToSelector:@selector(serialPortFailedToOpen)])
-                {
-                    [self.delegate serialPortFailedToOpen];
+            if (anError != NULL) {
+                NSString *description;
+                int errCode;
+                
+                switch (errno) {
+                        
+                    default:
+                        description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"");
+                        errCode = EISerialPortUnknownOpeningError;
+                        break;
                 }
-            });
-            return;
+                
+                // Create the underlying error.
+                NSError *underlyingError = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain
+                                                                      code:errno userInfo:nil];
+                // Create and return the custom domain error.
+                NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : description,
+                                                   NSUnderlyingErrorKey : underlyingError,
+                                                   NSFilePathErrorKey : [self path] };
+                
+                *anError = [[NSError alloc] initWithDomain:@"au.com.electronicinnovations.EISerialPort"
+                                                      code:errCode userInfo:errorDictionary];
+            }
+            return NO;
         } else {
             // Notify of successful opening
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -221,6 +233,31 @@
             if (returnCode == -1)
             {
                 //NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+                if (anError != NULL) {
+                    NSString *description;
+                    int errCode;
+                    
+                    switch (errno) {
+                        case EBADF:
+                            description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                            errCode = EISerialPortUnknownOpeningError;
+                        default:
+                            description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                            errCode = EISerialPortUnknownIOCTLError;
+                            break;
+                    }
+                    
+                    // Create the underlying error.
+                    NSError *underlyingError = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain
+                                                                          code:errno userInfo:nil];
+                    // Create and return the custom domain error.
+                    NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : description,
+                                                       NSUnderlyingErrorKey : underlyingError,
+                                                       NSFilePathErrorKey : [self path] };
+                    
+                    *anError = [[NSError alloc] initWithDomain:@"au.com.electronicinnovations.EISerialPort"
+                                                          code:errCode userInfo:errorDictionary];
+                }
             }
             
             returnCode = tcgetattr(self.fileDescriptor, &_originalAttributes);
@@ -247,16 +284,19 @@
                 //NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
+            _open = YES;
+            
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-            [self startModifyingSettings];
+            
             [self setBaudRate:[defaults objectForKey:[NSString stringWithFormat:@"%@-baudRate", self.name]]];
             [self setDataBits:(EISerialDataBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-dataBits", self.name]] integerValue]];
             [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
             [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
             [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
-            [self finishModifyingSettings];
             
             [self setupReceiveThread];
+            
+            return YES;
         }
     }
 }
@@ -267,7 +307,7 @@
     dispatch_async(self.sendQueue, ^{
         
         if ([self isOpen]) {
-            
+            _open = NO;
             //[self suspendReading];
             //dispatch_source_cancel(readSource);
             sleep(0.2);
@@ -386,10 +426,12 @@
 
 - (void) setBaudRate:(NSNumber *) baudRate;
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         cfsetispeed(&_modifiedAttributes, [baudRate longValue]);
         cfsetospeed(&_modifiedAttributes, [baudRate longValue]);
     } );
+    [self finishModifyingSettings];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:baudRate forKey:[NSString stringWithFormat:@"%@-baudRate", self.name]];
@@ -422,6 +464,7 @@
 
 -(void)setFlowControl:(EISerialFlowControl)method
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         switch (method) {
             case EIFlowControlNone:
@@ -445,6 +488,8 @@
                 break;
         }
     } );
+    [self finishModifyingSettings];
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[NSNumber numberWithInt:method] forKey:[NSString stringWithFormat:@"%@-flowControl", self.name]];
 }
@@ -476,6 +521,7 @@
 
 -(void)setParity:(EISerialParity)parity
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         switch (parity) {
             case EIParityNone:
@@ -493,6 +539,8 @@
                 break;
         }
     } );
+    [self finishModifyingSettings];
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[NSNumber numberWithInt:parity] forKey:[NSString stringWithFormat:@"%@-parity", self.name]];
 }
@@ -515,9 +563,11 @@
 
 -(void)setMinBytesPerRead:(uint)min
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cc[VMIN] = min;
     } );
+    [self finishModifyingSettings];
 }
 
 
@@ -538,22 +588,27 @@
 
 -(void)setTimeout:(uint)time
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cc[VTIME] = time;
     } );
+    [self finishModifyingSettings];
 }
 
 
 -(void)setRawMode
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         cfmakeraw(&_modifiedAttributes);
     } );
+    [self finishModifyingSettings];
 }
 
 
 -(void)flushIO
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         if (tcflush([self fileDescriptor], TCIOFLUSH) == -1)
         {
@@ -561,6 +616,7 @@
                    strerror(errno), errno);
         }
     } );
+    [self finishModifyingSettings];
 }
 
 
@@ -598,16 +654,20 @@
 
 -(void)setOneStopBit
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cflag &= ~CSTOPB;
     } );
+    [self finishModifyingSettings];
 }
 
 -(void)setTwoStopBits
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cflag |= CSTOPB;
     } );
+    [self finishModifyingSettings];
 }
 
 
@@ -645,6 +705,7 @@
 
 -(void)setDataBits:(EISerialDataBits)dataBits
 {
+    [self startModifyingSettings];
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cflag &= ~CSIZE;
         switch (dataBits) {
@@ -664,6 +725,7 @@
                 break;
         }
     } );
+    [self finishModifyingSettings];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[NSNumber numberWithInt:dataBits] forKey:[NSString stringWithFormat:@"%@-dataBits", self.name]];
 }
@@ -905,7 +967,7 @@
         NSData *toBeSent, *sent;
         uint roomInBuffer, numberOfBytesToSend;
         
-        while (bytesSent < [dataToSend length]) {
+        while (bytesSent < [dataToSend length] && self.isOpen) {
             
             uint ioctlBytestInBuffer;
             int returnCode = ioctl(self.fileDescriptor, TIOCOUTQ, &ioctlBytestInBuffer);
@@ -924,8 +986,8 @@
                 toBeSent = [dataToSend subdataWithRange:NSMakeRange(bytesSent, numberOfBytesToSend)];
                 numBytes = write(self.fileDescriptor, [toBeSent bytes], [toBeSent length]);
                 if (numBytes == -1) {
-                    //NSLog(@"Write Error:%s", strerror( errno ));
-                    usleep(10000000);
+                    NSLog(@"Write Error:%s", strerror( errno ));
+                    usleep(100000);
                 } else {
                     bytesSent = bytesSent + numBytes;
                     sent = [toBeSent subdataWithRange:NSMakeRange(0, numBytes)];

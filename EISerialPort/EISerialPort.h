@@ -40,7 +40,7 @@ typedef enum {
 
 @optional
 - (void) serialPortDidOpen;
-- (void) serialPortFailedToOpen; // Should this return an NSError???
+- (void) serialPortExperiencedAnError:(NSError *)anError;
 - (void) serialPortDidChangeSettings;
 - (void) serialPortDidReceiveData:(NSData *)data;
 - (void) serialPortDidSendData:(NSData *)data;

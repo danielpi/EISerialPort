@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E636B97E181DD8B200D0A349 /* EISerialPortError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortError.h; sourceTree = "<group>"; };
 		E6A9240E17F8E192006D4852 /* EISerialPortSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortSelectionController.h; sourceTree = "<group>"; };
 		E6A9240F17F8E192006D4852 /* EISerialPortSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialPortSelectionController.m; sourceTree = "<group>"; };
 		E6F8E5FD17F2A70600934D1D /* EISerialPortExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EISerialPortExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,6 +175,7 @@
 		E6F8E63417F2A72F00934D1D /* EISerialPort */ = {
 			isa = PBXGroup;
 			children = (
+				E636B97E181DD8B200D0A349 /* EISerialPortError.h */,
 				E6F8E63517F2A72F00934D1D /* EISerialPort.h */,
 				E6F8E63617F2A72F00934D1D /* EISerialPort.m */,
 				E6F8E63717F2A72F00934D1D /* EISerialPortManager.h */,

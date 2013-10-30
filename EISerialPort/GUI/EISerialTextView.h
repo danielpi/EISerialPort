@@ -22,11 +22,13 @@
 @interface EISerialTextView : NSTextView
 
 @property (readwrite, weak) id delegate;
+@property (readwrite, strong) NSColor *caretColor;
 
 - (void)keyDown:(NSEvent *)theEvent;
 - (void)paste:(id)sender;
 
 - (void)appendCharacters:(NSData *)characters;
+- (void)appendString:(NSString *)aString;
 
 // EISerialDelegate
 //- (void) serialPortDidReceiveData:(NSData *)data;

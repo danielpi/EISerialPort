@@ -997,6 +997,11 @@
                 usleep(5000);
             }
         }
+        if ([self.delegate respondsToSelector:@selector(serialPortDidSendData:)])
+        {
+            [self.delegate performSelector:@selector(serialPortDidSendData:) withObject:dataToSend];
+        }
+        
     };
     
     dispatch_async(self.sendQueue, writeData);

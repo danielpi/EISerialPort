@@ -12,7 +12,7 @@
 @interface EISerialTextView ()
 
 @property NSRange terminalInsertionPoint;
-@property (readwrite, strong) NSColor *caretColor;
+
 
 @end
 
@@ -160,7 +160,13 @@
 {
     NSString* sentString = [[NSString alloc] initWithData:characters encoding:NSASCIIStringEncoding];
     
-    NSString *remainder = [NSString stringWithString:sentString];
+    [self appendString:sentString];
+}
+
+
+- (void)appendString:(NSString *)aString
+{
+    NSString *remainder = [NSString stringWithString:aString];
     
     dispatch_async(dispatch_get_main_queue(), ^{ [self.textStorage beginEditing]; });
     

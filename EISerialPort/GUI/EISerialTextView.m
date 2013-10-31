@@ -40,9 +40,10 @@
     [self setAllowsUndo:NO];
     [self setRichText:NO];
     
-    [[self textContainer] setContainerSize:NSMakeSize(FLT_MAX, FLT_MAX)];
-    [[self textContainer] setWidthTracksTextView:NO];
-    [self setHorizontallyResizable:YES];
+    // The following code implements some form of line wrap blocking. Needs to be a setable option
+    //[[self textContainer] setContainerSize:NSMakeSize(FLT_MAX, FLT_MAX)];
+    //[[self textContainer] setWidthTracksTextView:NO];
+    //[self setHorizontallyResizable:YES];
     
     endRange.location = [[self textStorage] length];
     endRange.length = 0;

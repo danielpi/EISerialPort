@@ -62,8 +62,52 @@ The methods that must be implemented inorder to conform to the EISerialPortSelec
 	
 The *availablePortsListDidChange* method is called whenever a port is added or removed from the computer (for instance if a USB to serial adaptor is plugged or unplugged). Your controller should request the updated list of ports from the EISerialPortSelectionManager object and then update any of the GUI selection controls that are visible to the user.
 
+One possible implementation of the availablePortsListDidChange method for a PopUpButton GUI is as follows
+
+    - (void) availablePortsListDidChange
+    {
+        [self.serialPortSelectionPopUp removeAllItems];
+        
+        for (NSDictionary *portDetails in _portSelectionController.popUpButtonDetails){
+            NSString *portName = [portDetails valueForKey:@"name"];
+            BOOL portEnabled = [[portDetails valueForKey:@"enabled"] boolValue];
+            [self.serialPortSelectionPopUp addItemWithTitle:portName];
+            [[self.serialPortSelectionPopUp itemWithTitle:portName] setEnabled:portEnabled];
+        }
+    }
+
 The *selectedSerialPortDidChange* method is called when the EISerialPortSelectionManager has changed the selected port. Here again your controller needs to consult the EISerialPortSelectionManager, find out which port is currently selected and update any selection controls. If there is no selection the selectedPort: method will return nil. When you implement this function you should set the serial ports delegate at this point.
 
+As an example
+
+
+    - (void) selectedSerialPortDidChange
+    {
+        if (_portSelectionController.selectedPort != nil) {
+            [[_portSelectionController selectedPort] setDelegate:self];
+        }
+        [self updateSerialPortUI];
+    }
+
+When your controller decides to change the selected serial port there are a couple of tasks you should perform.
+- If the previous port is open you should close it
+- You should also set the previous ports delegate to nil if that is appropriate
+- finally you need to call the selectPortWithName: function of the selection controller so that the new port is actually selected.
+
+Here is an example
+
+
+    - (IBAction) changeSerialPortSelection:(id)sender
+    {
+        EISerialPort *previouslySelectedPort = [_portSelectionController selectedPort];
+        NSString *newlySelectedPortName = [[self.serialSelectionPopUp selectedItem] title];
+        
+        if ([previouslySelectedPort isOpen]) {
+            [previouslySelectedPort close];
+        }
+        [previouslySelectedPort setDelegate:nil];
+        [_portSelectionController selectPortWithName:newlySelectedPortName];
+    }
 
 ## Opening a port
 

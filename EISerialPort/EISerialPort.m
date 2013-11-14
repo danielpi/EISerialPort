@@ -27,6 +27,7 @@
 
 @property (readwrite) dispatch_queue_t sendQueue;
 @property (readwrite) dispatch_queue_t receiveQueue;
+@property (readwrite) NSMutableSet *delegates;
 @property (atomic, retain, readwrite) NSTimer *timer;
 @property (readonly) uint idealBufferSize;
 
@@ -70,6 +71,7 @@
         _sendQueue = dispatch_queue_create("au.com.electronicinnovations.sendQueue", NULL);
         _receiveQueue = dispatch_queue_create("au.com.electronicinnovations.receiveQueue", NULL);
         _timer = [[NSTimer alloc] init];
+        _delegates = [[NSMutableSet alloc] init];
     }
     return self;
 }
@@ -131,6 +133,34 @@
 }
 
 
+- (void) setDelegate:(id)delegate
+{
+    [self removeDelegate:_delegate];
+    [self addDelegate:delegate];
+    _delegate = delegate;
+}
+
+- (void) addDelegate:(id)aDelegate
+{
+    if (aDelegate) {
+        [self.delegates addObject:aDelegate];
+    }
+}
+
+- (void) removeDelegate:(id)aDelegate
+{
+    if (aDelegate) {
+        [self.delegates removeObject:aDelegate];
+    }
+}
+
+- (void) removeAllDelegates
+{
+    [self.delegates removeAllObjects];
+    _delegate = nil;
+}
+
+
 - (NSString *) byteToBinaryString:(uint16)aByte
 {
     NSMutableString *binaryRep;
@@ -159,9 +189,11 @@
         BOOL success = [self openSynchronously:&error];
         
         if (!success) {
-            if ([self.delegate respondsToSelector:@selector(serialPortExperiencedAnError:)])
-            {
-                [self.delegate serialPortExperiencedAnError:error];
+            for (id delegate in self.delegates) {
+                if ([delegate respondsToSelector:@selector(serialPortExperiencedAnError:)])
+                {
+                    [delegate serialPortExperiencedAnError:error];
+                }
             }
         }
     };
@@ -175,7 +207,7 @@
     int returnCode;
     int connectAttempts = 2;
     //NSLog(@"Opening Port\n");
-    NSDictionary *userInfo;
+    //NSDictionary *userInfo;
         
     //NSDictionary *userInfo = @{
     //                           NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
@@ -222,9 +254,11 @@
         } else {
             // Notify of successful opening
             dispatch_async(dispatch_get_main_queue(), ^{
-                if ([self.delegate respondsToSelector:@selector(serialPortDidOpen)])
-                {
-                    [self.delegate serialPortDidOpen];
+                for (id delegate in self.delegates) {
+                    if ([delegate respondsToSelector:@selector(serialPortDidOpen)])
+                    {
+                        [delegate serialPortDidOpen];
+                    }
                 }
             });
             
@@ -346,9 +380,11 @@
             close([self fileDescriptor]);
             self.fileDescriptor = -1;
             dispatch_async(dispatch_get_main_queue(), ^{
-                if ([self.delegate respondsToSelector:@selector(serialPortDidClose)])
-                {
-                    [self.delegate serialPortDidClose];
+                for (id delegate in self.delegates) {
+                    if ([delegate respondsToSelector:@selector(serialPortDidClose)])
+                    {
+                        [delegate serialPortDidClose];
+                    }
                 }
             });
         }
@@ -997,9 +1033,11 @@
                 usleep(5000);
             }
         }
-        if ([self.delegate respondsToSelector:@selector(serialPortDidSendData:)])
-        {
-            [self.delegate performSelector:@selector(serialPortDidSendData:) withObject:dataToSend];
+        for (id delegate in self.delegates) {
+            if ([delegate respondsToSelector:@selector(serialPortDidSendData:)])
+            {
+                [delegate performSelector:@selector(serialPortDidSendData:) withObject:dataToSend];
+            }
         }
         
     };
@@ -1068,9 +1106,11 @@
 				NSData *readData = [NSData dataWithBytes:buf length:lengthRead];
 				//if (readData != nil) dispatch_async(dispatch_get_main_queue(), ^{
                 if (readData != nil) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self.delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
-                    });
+                    for (id delegate in self.delegates) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
+                        });
+                    }
                 }
 			}
 		}

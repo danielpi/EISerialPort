@@ -55,7 +55,7 @@ typedef enum {
 @property (readonly, strong) NSString *path;
 @property (readonly, getter = isOpen) BOOL open;
 
-@property (readwrite, weak) id delegate;
+@property (readwrite, weak, nonatomic) id delegate;
 
 @property (nonatomic, readwrite) NSNumber *baudRate;
 @property (nonatomic, readwrite) EISerialParity parity;
@@ -85,6 +85,9 @@ typedef enum {
 
 - (NSString *) description;
 + (NSArray *) standardBaudRates;
+
+- (void) addDelegate:(id)aDelegate;
+- (void) removeDelegate:(id)aDelegate;
 
 - (void) open;
 - (void) close;

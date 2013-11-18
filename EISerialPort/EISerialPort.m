@@ -1003,7 +1003,7 @@
         NSData *toBeSent, *sent;
         uint roomInBuffer, numberOfBytesToSend;
         
-        while (bytesSent < [dataToSend length] && self.isOpen) {
+        while ((bytesSent < [dataToSend length]) && self.isOpen) {
             
             uint ioctlBytestInBuffer;
             int returnCode = ioctl(self.fileDescriptor, TIOCOUTQ, &ioctlBytestInBuffer);
@@ -1023,6 +1023,9 @@
                 numBytes = write(self.fileDescriptor, [toBeSent bytes], [toBeSent length]);
                 if (numBytes == -1) {
                     NSLog(@"Write Error:%s", strerror( errno ));
+                    [self close];
+                    bytesSent = bytesSent + numBytes;
+                    [self open];
                     usleep(100000);
                 } else {
                     bytesSent = bytesSent + numBytes;

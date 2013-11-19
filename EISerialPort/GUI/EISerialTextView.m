@@ -259,7 +259,7 @@
                     _terminalInsertionPoint.length = 0;
                      break;
                 default:
-                    NSLog(@"Unhandled Control Character:%d", [controlCharacter characterAtIndex:0]);
+                    //NSLog(@"Unhandled Control Character:%d", [controlCharacter characterAtIndex:0]);
                     break;
         
             }

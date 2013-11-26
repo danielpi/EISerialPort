@@ -1111,7 +1111,9 @@
                 if (readData != nil) {
                     for (id delegate in self.delegates) {
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            [delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
+                            if ([delegate respondsToSelector:@selector(serialPortDidReceiveData:)]) {
+                                [delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
+                            }
                         });
                     }
                 }

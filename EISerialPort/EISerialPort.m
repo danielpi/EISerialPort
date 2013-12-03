@@ -77,7 +77,10 @@
 }
 
 #pragma mark Properties
-
++ (NSArray *) standardBaudRates
+{
+    return @[ @2400, @4800, @9600, @19200, @38400, @57600, @115200, @230400, @460800];
+}
 
 #pragma mark Comparison
 - (BOOL)isEqual:(id)other

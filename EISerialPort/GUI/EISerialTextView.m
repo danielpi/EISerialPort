@@ -136,6 +136,11 @@
     {
         [self.delegate receivedStringFromUser:input];
     }
+    if ([self.delegate respondsToSelector:@selector(receivedDataFromUser:)])
+    {
+        NSData *data = [input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+        [self.delegate receivedDataFromUser:data];
+    }
 }
 
 

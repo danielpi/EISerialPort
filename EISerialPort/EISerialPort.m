@@ -1003,7 +1003,8 @@
     writeData = ^(void) {
         ssize_t numBytes = 0;
         ssize_t bytesSent = 0;
-        NSData *toBeSent, *sent;
+        NSData *toBeSent;
+        //NSData *sent;
         uint roomInBuffer, numberOfBytesToSend;
         
         while ((bytesSent < [dataToSend length]) && self.isOpen) {
@@ -1032,7 +1033,7 @@
                     usleep(100000);
                 } else {
                     bytesSent = bytesSent + numBytes;
-                    sent = [toBeSent subdataWithRange:NSMakeRange(0, numBytes)];
+                    //sent = [toBeSent subdataWithRange:NSMakeRange(0, numBytes)];
                     
                 }
             } else {

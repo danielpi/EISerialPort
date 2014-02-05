@@ -96,6 +96,7 @@
 /* Caret Drawing
  The current caret is a big improvement on the default caret. It now stays in the right place. Things that could be improved though are, Should blink, Should animate in and out, Shouldn't be displayed if you are writing text.
  */
+
 - (BOOL)shouldDrawInsertionPoint
 {
     return NO;

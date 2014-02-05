@@ -41,9 +41,9 @@
     [self setRichText:NO];
     
     // The following code implements some form of line wrap blocking. Needs to be a setable option
-    //[[self textContainer] setContainerSize:NSMakeSize(FLT_MAX, FLT_MAX)];
-    //[[self textContainer] setWidthTracksTextView:NO];
-    //[self setHorizontallyResizable:YES];
+    [[self textContainer] setContainerSize:NSMakeSize(FLT_MAX, FLT_MAX)];
+    [[self textContainer] setWidthTracksTextView:NO];
+    [self setHorizontallyResizable:YES];
     
     endRange.location = [[self textStorage] length];
     endRange.length = 0;
@@ -241,14 +241,14 @@
                 case 0x0009: // TAB
                     self.terminalInsertionPoint = [self selectedRange];
                     charToBeSent = [NSString stringWithFormat:@"\t"];
-                    _terminalInsertionPoint.length = MIN([toBeSent length],
+                    _terminalInsertionPoint.length = MIN([charToBeSent length],
                                                     ([[self textStorage] length] - self.terminalInsertionPoint.location));
                     [self replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
                     _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [charToBeSent length];
                     _terminalInsertionPoint.length = 0;
                     break;
                 case 0x000A: // New Line
-                     _terminalInsertionPoint.location = [[self textStorage] length];
+                    _terminalInsertionPoint.location = [[self textStorage] length];
                     _terminalInsertionPoint.length = 0;
                     charToBeSent = [NSString stringWithFormat:@"\n"];
                     [self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent]; // Can this be coalesed?
@@ -262,11 +262,12 @@
                     _terminalInsertionPoint.location = MAX(startOfLine.location, 0);
                     _terminalInsertionPoint.location = MIN(startOfLine.location, [self.textStorage length]);
                     _terminalInsertionPoint.length = 0;
-                     break;
+                    break;
                 default:
                     //NSLog(@"Unhandled Control Character:%d", [controlCharacter characterAtIndex:0]);
+                    //charToBeSent = [NSString stringWithFormat:@"?"];
+                    //[self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
                     break;
-        
             }
             [self setSelectedRanges:originalSelectionArray];
         });
@@ -287,11 +288,8 @@
         } else {
             // There was no control character
             toBeSent = inputString;
-            
             remainder = [NSString stringWithFormat:@""];
         }
-        
-        
         
         dispatch_async(dispatch_get_main_queue(), ^{
             NSArray *originalSelectionArray;
@@ -301,7 +299,6 @@
             originalSelectionArray = [self selectedRanges];
             // Move the insertion point to the remembered terminal insertion point.
             [self setSelectedRange:self.terminalInsertionPoint];
-
             
             endRange.location = [[self textStorage] length];
             endRange.length = 0;

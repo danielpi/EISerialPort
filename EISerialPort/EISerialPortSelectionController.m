@@ -33,7 +33,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
                        forKeyPath:@"availablePorts"
                           options:NSKeyValueObservingOptionNew
                           context:NULL];
-        [self performSelector:@selector(checkUserDefaultsForPreviousSelection) withObject:nil afterDelay:0.1];
+        [self performSelector:@selector(checkUserDefaultsForPreviousSelection) withObject:nil afterDelay:0.3];
     }
     return self;
 }
@@ -51,8 +51,8 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     NSString *selectedPortName = [defaults objectForKey:_label];
     EISerialPort *defaultPort = [_portManager serialPortWithName:selectedPortName];
     
-    //NSLog(@"Default port:%@", defaultPort);
-    //NSLog(@"Available ports:%@", _portManager.availablePorts);
+    NSLog(@"Default port:%@", defaultPort);
+    NSLog(@"Available ports:%@", _portManager.availablePorts);
     
     //NSLog(@"valueForKey:%@",[_portManager valueForKey:@"availablePorts"]);
     
@@ -90,6 +90,15 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
                            change:change
                           context:context];
     */
+}
+
+- (NSIndexSet *)selectedPortIndex
+{
+    if (!self.selectedPort) {
+        return nil;
+    } else {
+        return [[NSIndexSet alloc] initWithIndex: [self.availablePorts indexOfObject:self.selectedPort]];
+    }
 }
 
 - (NSArray *)availablePorts

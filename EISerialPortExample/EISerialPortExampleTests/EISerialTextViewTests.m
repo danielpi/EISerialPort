@@ -13,6 +13,9 @@
 
 @property (readwrite, strong) EISerialTextView *textView;
 @property (readwrite, strong) NSData *data;
+@property (readwrite, strong) NSString *string;
+@property BOOL sendBreakReceived;
+@property (readwrite, strong) NSConditionLock * theLock;
 
 @end
 
@@ -22,6 +25,7 @@
 {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+    
     _textView = [[EISerialTextView alloc] init];
     [_textView setDelegate:self];
 }
@@ -29,9 +33,29 @@
 - (void)tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-    _data = nil;
+    //self.sendBreakReceived = NO;
+    _data  = nil;
+    //self.string = nil;
     [super tearDown];
 }
+
+
+#pragma mark EISerialTextViewDelegate
+- (void)receivedDataFromUser:(NSData *)data
+{
+    self.data = data;
+}
+/*
+- (void)receivedStringFromUser:(NSString *)string
+{
+    self.string = string;
+}
+*/
+- (void)sendBreak
+{
+    self.sendBreakReceived = YES;
+}
+
 
 #pragma mark keyDown tests
 - (NSEvent *)keyDownEventFromKeyCode:(UInt)byte
@@ -53,10 +77,7 @@
     return event;
 }
 
-- (void)receivedDataFromUser:(NSData *)data
-{
-    self.data = data;
-}
+
 
 - (void)testStraightThroughKeyDown
 {
@@ -87,6 +108,26 @@
 }
 
 
+#pragma mark appendString tests
 
+- (void)testAppendString
+{
+    NSString *inputString = [NSString stringWithFormat:@"1234 1234 1234 \r\n1234 1234 1234 \r\n"];
+    NSString *expectedOutput = [NSString stringWithFormat:@"1234 1234 1234 \n1234 1234 1234 \n"];
+    
+    [self.textView appendString:inputString];
+    
+    XCTAssertEqualObjects(expectedOutput, self.textView.textStorage.mutableString, @"");
+}
+
+- (void)testCarraigeReturnOverright
+{
+    NSString *inputString = [NSString stringWithFormat:@"1234 1234 1234\r1234 1234 1234"];
+    NSString *expectedOutput = [NSString stringWithFormat:@"1234 1234 1234"];
+    
+    [self.textView appendString:inputString];
+        
+    XCTAssertEqualObjects(expectedOutput, self.textView.textStorage.mutableString, @"");
+}
 
 @end

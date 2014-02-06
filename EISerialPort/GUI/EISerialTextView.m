@@ -13,7 +13,6 @@
 
 @property NSRange terminalInsertionPoint;
 
-
 @end
 
 
@@ -178,7 +177,7 @@
     [self appendString:sentString];
 }
 
-
+/*
 - (void)appendString:(NSString *)aString
 {
     NSString *remainder = [NSString stringWithString:aString];
@@ -191,6 +190,34 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{ [self.textStorage endEditing]; });
     dispatch_async(dispatch_get_main_queue(), ^{ [self scrollRangeToVisible:self.terminalInsertionPoint]; });
+}
+*/
+
+- (void)appendString:(NSString *)aString
+{
+    NSString __block *remainder = [NSString stringWithString:aString];
+    
+    if (dispatch_get_main_queue() == dispatch_get_current_queue()) {
+        [self.textStorage beginEditing];
+        
+        do {
+            remainder = [self processStringPortion:remainder];
+        } while ([remainder length] > 0);
+        
+        [self.textStorage endEditing];
+        [self scrollRangeToVisible:self.terminalInsertionPoint];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.textStorage beginEditing];
+        
+            do {
+                remainder = [self processStringPortion:remainder];
+            } while ([remainder length] > 0);
+        
+            [self.textStorage endEditing];
+            [self scrollRangeToVisible:self.terminalInsertionPoint];
+        });
+    }
 }
 
 
@@ -229,57 +256,57 @@
             }
         }
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //NSLog(@"parseCharacters");
-            
-            NSArray *originalSelectionArray;
-            // Save the user selection prior to any changes being made.
-            originalSelectionArray = [self selectedRanges];
-            // Move the insertion point to the remembered terminal insertion point.
-            [self setSelectedRange:self.terminalInsertionPoint];
+        NSArray *originalSelectionArray;
+        // Save the user selection prior to any changes being made.
+        originalSelectionArray = [self selectedRanges];
+        // Move the insertion point to the remembered terminal insertion point.
+        [self setSelectedRange:self.terminalInsertionPoint];
 
-            
-            NSString *charToBeSent;
-            NSRange startOfLine;
-            
-            switch ([controlCharacter characterAtIndex:0]) {
-                case 0x0008: // Backspace
-                    // Need protection to stop moving back up a line
-                    _terminalInsertionPoint.location = self.terminalInsertionPoint.location - 1;
-                    break;
-                case 0x0009: // TAB
-                    self.terminalInsertionPoint = [self selectedRange];
-                    charToBeSent = [NSString stringWithFormat:@"\t"];
-                    _terminalInsertionPoint.length = MIN([charToBeSent length],
-                                                    ([[self textStorage] length] - self.terminalInsertionPoint.location));
-                    [self replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
-                    _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [charToBeSent length];
-                    _terminalInsertionPoint.length = 0;
-                    break;
-                case 0x000A: // New Line
-                    _terminalInsertionPoint.location = [[self textStorage] length];
-                    _terminalInsertionPoint.length = 0;
-                    charToBeSent = [NSString stringWithFormat:@"\n"];
-                    [self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent]; // Can this be coalesed?
-                    _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [charToBeSent length];
-                    _terminalInsertionPoint.length = 0;
-                    break;
-                case 0x000D: // Carriage Return
-                    startOfLine = [self.textStorage.string rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]
-                                                             options:NSBackwardsSearch];
+        
+        NSString *charToBeSent;
+        NSRange startOfLine;
+        
+        switch ([controlCharacter characterAtIndex:0]) {
+            case 0x0008: // Backspace
+                // Need protection to stop moving back up a line
+                _terminalInsertionPoint.location = self.terminalInsertionPoint.location - 1;
+                break;
+            case 0x0009: // TAB
+                self.terminalInsertionPoint = [self selectedRange];
+                charToBeSent = [NSString stringWithFormat:@"\t"];
+                _terminalInsertionPoint.length = MIN([charToBeSent length],
+                                                ([[self textStorage] length] - self.terminalInsertionPoint.location));
+                [self replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
+                _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [charToBeSent length];
+                _terminalInsertionPoint.length = 0;
+                break;
+            case 0x000A: // New Line
+                _terminalInsertionPoint.location = [[self textStorage] length];
+                _terminalInsertionPoint.length = 0;
+                charToBeSent = [NSString stringWithFormat:@"\n"];
+                [self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent]; // Can this be coalesed?
+                _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [charToBeSent length];
+                _terminalInsertionPoint.length = 0;
+                break;
+            case 0x000D: // Carriage Return
+                startOfLine = [self.textStorage.string rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]
+                                                         options:NSBackwardsSearch];
+                if (startOfLine.location == NSNotFound) {
+                    startOfLine.location = 0;
+                } else {
                     startOfLine.location = startOfLine.location + 1;
-                    _terminalInsertionPoint.location = MAX(startOfLine.location, 0);
-                    _terminalInsertionPoint.location = MIN(startOfLine.location, [self.textStorage length]);
-                    _terminalInsertionPoint.length = 0;
-                    break;
-                default:
-                    //NSLog(@"Unhandled Control Character:%d", [controlCharacter characterAtIndex:0]);
-                    //charToBeSent = [NSString stringWithFormat:@"?"];
-                    //[self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
-                    break;
-            }
-            [self setSelectedRanges:originalSelectionArray];
-        });
+                }
+                _terminalInsertionPoint.location = MAX(startOfLine.location, 0);
+                _terminalInsertionPoint.location = MIN(startOfLine.location, [self.textStorage length]);
+                _terminalInsertionPoint.length = 0;
+                break;
+            default:
+                //NSLog(@"Unhandled Control Character:%d", [controlCharacter characterAtIndex:0]);
+                //charToBeSent = [NSString stringWithFormat:@"?"];
+                //[self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:charToBeSent];
+                break;
+        }
+        [self setSelectedRanges:originalSelectionArray];
         
         remainderRange.location = controlCharacterRange.location + 1;
         remainderRange.length = [inputString length] - 1;
@@ -299,7 +326,7 @@
             toBeSent = inputString;
             remainder = [NSString stringWithFormat:@""];
         }
-        
+        /*
         dispatch_async(dispatch_get_main_queue(), ^{
             NSArray *originalSelectionArray;
             NSRange endRange;
@@ -322,7 +349,28 @@
             _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [toBeSent length];
             _terminalInsertionPoint.length = 0;
             [self setSelectedRanges:originalSelectionArray];
-        });
+        });*/
+        NSArray *originalSelectionArray;
+        NSRange endRange;
+        
+        // Save the user selection prior to any changes being made.
+        originalSelectionArray = [self selectedRanges];
+        // Move the insertion point to the remembered terminal insertion point.
+        [self setSelectedRange:self.terminalInsertionPoint];
+        
+        endRange.location = [[self textStorage] length];
+        endRange.length = 0;
+        
+        // The insertion length must be either the length of the text being entered or the distance to the end of the text storage.
+        _terminalInsertionPoint.length = MIN([toBeSent length],
+                                             (endRange.location - self.terminalInsertionPoint.location));
+        
+        [self.textStorage replaceCharactersInRange:self.terminalInsertionPoint withString:toBeSent];
+        
+        // Set the global insertion point to the correct position.
+        _terminalInsertionPoint.location = self.terminalInsertionPoint.location + [toBeSent length];
+        _terminalInsertionPoint.length = 0;
+        [self setSelectedRanges:originalSelectionArray];
     }
     
     return remainder;

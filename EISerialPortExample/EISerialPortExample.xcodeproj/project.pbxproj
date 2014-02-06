@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E6936A0518A30D1600A0DD2F /* EISerialTextViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E6936A0418A30D1600A0DD2F /* EISerialTextViewTests.m */; };
 		E6A9241017F8E192006D4852 /* EISerialPortSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = E6A9240F17F8E192006D4852 /* EISerialPortSelectionController.m */; };
 		E6F8E60117F2A70600934D1D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6F8E60017F2A70600934D1D /* Cocoa.framework */; };
 		E6F8E60B17F2A70600934D1D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E6F8E60917F2A70600934D1D /* InfoPlist.strings */; };
@@ -37,6 +38,7 @@
 
 /* Begin PBXFileReference section */
 		E636B97E181DD8B200D0A349 /* EISerialPortError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortError.h; sourceTree = "<group>"; };
+		E6936A0418A30D1600A0DD2F /* EISerialTextViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialTextViewTests.m; sourceTree = "<group>"; };
 		E6A9240E17F8E192006D4852 /* EISerialPortSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortSelectionController.h; sourceTree = "<group>"; };
 		E6A9240F17F8E192006D4852 /* EISerialPortSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialPortSelectionController.m; sourceTree = "<group>"; };
 		E6F8E5FD17F2A70600934D1D /* EISerialPortExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EISerialPortExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				E6F8E62A17F2A70700934D1D /* EISerialPortExampleTests.m */,
+				E6936A0418A30D1600A0DD2F /* EISerialTextViewTests.m */,
 				E6F8E62517F2A70700934D1D /* Supporting Files */,
 			);
 			path = EISerialPortExampleTests;
@@ -309,6 +312,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E6F8E62B17F2A70700934D1D /* EISerialPortExampleTests.m in Sources */,
+				E6936A0518A30D1600A0DD2F /* EISerialTextViewTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

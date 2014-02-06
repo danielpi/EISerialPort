@@ -23,7 +23,6 @@
 extern NSString * const EISelectedSerialPortNameKey;
 
 
-
 @interface EISerialPortSelectionController : NSObject
 
 @property (readwrite, unsafe_unretained) id delegate;

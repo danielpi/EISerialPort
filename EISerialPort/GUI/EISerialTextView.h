@@ -16,6 +16,7 @@
 @optional
 - (void)receivedDataFromUser:(NSData *)data;
 - (void)receivedStringFromUser:(NSString *)string;
+- (void)sendBreak;
 @end
 
 
@@ -30,6 +31,7 @@
 - (void)appendCharacters:(NSData *)characters;
 - (void)appendString:(NSString *)aString;
 
+- (void)sendBreak:(id)sender;
 // EISerialDelegate
 //- (void) serialPortDidReceiveData:(NSData *)data;
 //- (void) serialPortDidSendData:(NSData *)data;

@@ -19,6 +19,7 @@
 
 @implementation EISerialTextView
 
+/*
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
@@ -30,6 +31,7 @@
     
     return self;
 }
+ */
 
 -(void)awakeFromNib
 {
@@ -133,12 +135,9 @@
             break;
     }
     
-	if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)])
-    {
+	if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)]) {
         [self.delegate receivedStringFromUser:input];
-    }
-    if ([self.delegate respondsToSelector:@selector(receivedDataFromUser:)])
-    {
+    } else if ([self.delegate respondsToSelector:@selector(receivedDataFromUser:)]) {
         NSData *data = [input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
         [self.delegate receivedDataFromUser:data];
     }
@@ -148,18 +147,27 @@
 - (void)paste:(id)sender
 {
 	NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
-	
-    //[serialPort setWritingCancelled:NO];
     
 	if ([[pasteBoard types] containsObject:@"NSStringPboardType"])
 	{
 		NSString *pasted = [pasteBoard stringForType:@"NSStringPboardType"];
         
-        if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)])
-        {
+        if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)]) {
             [self.delegate receivedStringFromUser:pasted];
+        } else if ([self.delegate respondsToSelector:@selector(receivedDataFromUser:)]) {
+            NSData *data = [pasted dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+            [self.delegate receivedDataFromUser:data];
         }
 	}
+}
+
+
+- (void)sendBreak:(id)sender
+{
+    //NSLog(@"Send Break");
+    if ([self.delegate respondsToSelector:@selector(sendBreak)]) {
+        [self.delegate sendBreak];
+    }
 }
 
 

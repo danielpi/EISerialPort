@@ -169,6 +169,19 @@
     }
 }
 
+- (void)sendReset:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(sendReset)]) {
+        [self.delegate sendReset];
+    }
+}
+
+- (void)cancelTransmit:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(cancelTransmit)]) {
+        [self.delegate cancelTransmit];
+    }
+}
 
 - (void)appendCharacters:(NSData *)characters;
 {
@@ -177,21 +190,6 @@
     [self appendString:sentString];
 }
 
-/*
-- (void)appendString:(NSString *)aString
-{
-    NSString *remainder = [NSString stringWithString:aString];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{ [self.textStorage beginEditing]; });
-    
-    do {
-        remainder = [self processStringPortion:remainder];
-    } while ([remainder length] > 0);
-    
-    dispatch_async(dispatch_get_main_queue(), ^{ [self.textStorage endEditing]; });
-    dispatch_async(dispatch_get_main_queue(), ^{ [self scrollRangeToVisible:self.terminalInsertionPoint]; });
-}
-*/
 
 - (void)appendString:(NSString *)aString
 {

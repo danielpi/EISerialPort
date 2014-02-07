@@ -25,6 +25,8 @@
 @property (readwrite) struct __block termios modifiedAttributes;
 @property (readwrite) struct __block termios originalAttributes;
 
+@property (readwrite, getter = isCancelled) BOOL cancelled;
+
 @property (readwrite) dispatch_queue_t sendQueue;
 @property (readwrite) dispatch_queue_t receiveQueue;
 @property (readwrite) NSMutableSet *delegates;
@@ -54,6 +56,7 @@
 	self = [super init];
     if (self) {
         _open = NO;
+        _cancelled = NO;
         _matchedMachPort = iOObject;
         CFTypeRef ioKitReturn;
         
@@ -987,10 +990,15 @@
     NSData *dataToSend = [aString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
     [self sendData:dataToSend];
 }
+
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter
 {
-    
+    NSArray *chunks = [aString componentsSeparatedByString: delimiter];
+    for (NSString *chunk in chunks){
+        [self sendString:chunk];
+    }
 }
+
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
 {
     
@@ -1007,7 +1015,7 @@
         //NSData *sent;
         uint roomInBuffer, numberOfBytesToSend;
         
-        while ((bytesSent < [dataToSend length]) && self.isOpen) {
+        while (![self isCancelled] && (bytesSent < [dataToSend length]) && self.isOpen) {
             
             uint ioctlBytestInBuffer;
             int returnCode = ioctl(self.fileDescriptor, TIOCOUTQ, &ioctlBytestInBuffer);
@@ -1040,6 +1048,9 @@
                 usleep(5000);
             }
         }
+        
+        [self setCancelled:NO];
+        
         for (id delegate in self.delegates) {
             if ([delegate respondsToSelector:@selector(serialPortDidSendData:)])
             {
@@ -1070,7 +1081,8 @@
 
 - (void) cancelCurrentTransmission
 {
-    
+    [self setCancelled:YES];
+    [self flushIO];
 }
 
 

@@ -54,6 +54,7 @@ typedef enum {
 @property (readonly, strong) NSString *name;
 @property (readonly, strong) NSString *path;
 @property (readonly, getter = isOpen) BOOL open;
+@property (readonly, getter = isCancelled) BOOL cancelled;
 
 @property (readwrite, weak, nonatomic) id delegate;
 

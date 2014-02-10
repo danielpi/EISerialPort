@@ -993,15 +993,16 @@
 
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter
 {
-    NSArray *chunks = [aString componentsSeparatedByString: delimiter];
-    for (NSString *chunk in chunks){
-        [self sendString:chunk];
-    }
+    [self sendString:aString inChunksSplitBy:delimiter replaceDelimiterWith:delimiter];
 }
 
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
 {
-    
+    NSArray *chunks = [aString componentsSeparatedByString: delimiter];
+    for (NSString *chunk in chunks){
+        [self sendString:chunk];
+        [self sendString:lineEnding];
+    }
 }
 
 

@@ -151,7 +151,9 @@
 	{
 		NSString *pasted = [pasteBoard stringForType:@"NSStringPboardType"];
         
-        if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)]) {
+        if ([self.delegate respondsToSelector:@selector(receivedPastedStringFromUser:)]) {
+            [self.delegate receivedPastedStringFromUser:pasted];
+        } else if ([self.delegate respondsToSelector:@selector(receivedStringFromUser:)]) {
             [self.delegate receivedStringFromUser:pasted];
         } else if ([self.delegate respondsToSelector:@selector(receivedDataFromUser:)]) {
             NSData *data = [pasted dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];

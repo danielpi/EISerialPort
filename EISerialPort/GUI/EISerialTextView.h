@@ -16,6 +16,7 @@
 @optional
 - (void)receivedDataFromUser:(NSData *)data;
 - (void)receivedStringFromUser:(NSString *)string;
+- (void)receivedPastedStringFromUser:(NSString *)string;
 - (void)sendBreak;
 - (void)sendReset;
 - (void)cancelTransmit;

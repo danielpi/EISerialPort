@@ -59,12 +59,35 @@
         _cancelled = NO;
         _matchedMachPort = iOObject;
         CFTypeRef ioKitReturn;
+        kern_return_t return_io;
         
         ioKitReturn = IORegistryEntryCreateCFProperty(_matchedMachPort, CFSTR(kIOTTYDeviceKey), kCFAllocatorDefault, 0);
         _name = [NSString stringWithString:(__bridge NSString *)ioKitReturn];
         
         ioKitReturn = IORegistryEntryCreateCFProperty(_matchedMachPort, CFSTR(kIOCalloutDeviceKey), kCFAllocatorDefault, 0);
         _path = [NSString stringWithString:(__bridge NSString *) ioKitReturn];
+        
+        // Try to look back up the IO Registry tree to see if this port is being run over Bluetooth or USB
+        io_object_t parent;
+        return_io = IORegistryEntryGetParentEntry(_matchedMachPort, kIOServicePlane, &parent);
+        CFTypeRef parentClass = IOObjectCopyClass(parent);
+        NSString *parentClassString = [NSString stringWithString:(__bridge NSString *) parentClass];
+        NSLog(@"Parent Class:%@",parentClassString);
+        
+        if ([parentClassString rangeOfString:@"Bluetooth"].location == NSNotFound) {
+            io_object_t grandParent;
+            return_io = IORegistryEntryGetParentEntry(parent, kIOServicePlane, &grandParent);
+            CFTypeRef grandParentClass = IOObjectCopyClass(grandParent);
+            NSString *grandParentClassString = [NSString stringWithString:(__bridge NSString *) grandParentClass];
+            NSLog(@"Grand Parent Class:%@",grandParentClassString);
+            if ([grandParentClassString rangeOfString:@"USB"].location == NSNotFound) {
+                _type = EIUnknownSerialPort;
+            } else {
+                _type = EIUSBSerialPort;
+            }
+        } else {
+            _type = EIBluetoothSerialPort;
+        }
         
         CFRelease(ioKitReturn);
         _fileDescriptor = -1;
@@ -999,9 +1022,13 @@
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
 {
     NSArray *chunks = [aString componentsSeparatedByString: delimiter];
-    for (NSString *chunk in chunks){
-        [self sendString:chunk];
-        [self sendString:lineEnding];
+    if ([chunks count] < 2) {
+        [self sendString:aString];
+    } else {
+        for (NSString *chunk in chunks){
+            [self sendString:chunk];
+            [self sendString:lineEnding];
+        }
     }
 }
 

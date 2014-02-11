@@ -35,6 +35,11 @@ typedef enum {
     EIEightDataBits         = 3
 } EISerialDataBits;
 
+typedef enum {
+    EIUnknownSerialPort     = 0,
+    EIBluetoothSerialPort   = 1,
+    EIUSBSerialPort         = 2,
+} EISerialPortType;
 
 @protocol EISerialDelegate
 
@@ -53,6 +58,7 @@ typedef enum {
 
 @property (readonly, strong) NSString *name;
 @property (readonly, strong) NSString *path;
+@property (readonly) EISerialPortType type;
 @property (readonly, getter = isOpen) BOOL open;
 @property (readonly, getter = isCancelled) BOOL cancelled;
 

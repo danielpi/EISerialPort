@@ -307,7 +307,7 @@ Things to note
 More often than not you are going to want to have some way of graphically selecting a port. EISerialPort tries to make this as easy as possible by providing the required data for several standard selection methods.
 
 ####Using a Pop Up Button
-![Example of a PopUp Button](/Users/danielpi/Dropbox/Programming/EISerialPort/README_Images/PopUpButton_Screenshot.png)
+![Example of a PopUp Button](/Users/danielpi/repos/EISerialPort/README_Images/PopUpButton_Screenshot.png)
 
 PopUp buttons are a convenient method of providing a list of ports to be selected from. To use them you need to cover the following steps
 
@@ -534,7 +534,29 @@ I'm not sure whether EISerial should own the selection task entirely or hand it 
 ### Serial port settings get changed
 
 
+## Status Indicator
+The overall status of the serial port needs to be easy to display to the end user. The states that I think are relevant are
+- Open
+- Closed
+- Closing
+- Error
 
+A toolbar button is a likely place to display this information. It would contain an image indicating the current state as well as a word indicating the process that would be undertaken if the button were pressed. 
 
+## GUI
+
+### Selection
+From a menu, popup, tableview
+
+### Open/close button
+Button used for opening, closing a serial port. 
+
+Needs to be able to show
+- should be greyed out if there is no port selected
+- should allow you to open a port
+- should show that it is attempting to open a port
+- should allow you to cancel opening a port???
+- should show if a port failed to open
+- should give a popup explaining the fault that occurred
 
 

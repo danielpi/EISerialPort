@@ -153,7 +153,7 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
     } else {
         CFDictionarySetValue(classesToMatch,
                              CFSTR(kIOSerialBSDTypeKey),
-                             CFSTR(kIOSerialBSDRS232Type));
+                             CFSTR(kIOSerialBSDAllTypes));
     }
     
     // Obtain an iterator object

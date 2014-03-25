@@ -10,6 +10,7 @@
 #import <IOKit/IOTypes.h>
 #import <termios.h>
 
+@class EISerialPort;
 
 typedef enum {	
 	EIStopbitsOne           = 0,
@@ -41,6 +42,8 @@ typedef enum {
     EIUSBSerialPort         = 2,
 } EISerialPortType;
 
+
+
 @protocol EISerialDelegate
 
 @optional
@@ -55,7 +58,7 @@ typedef enum {
 //- (void) serialPortDidOpen:(EISerialPort *)port;
 //- (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError;
 //- (void) serialPortDidChangeSettings:(EISerialPort *)port ;
-//- (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data;
+- (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data;
 //- (void) serialPort:(EISerialPort *)port didSendData:(NSData *)data;
 //- (void) serialPortDidClose:(EISerialPort *)port;
 //- (void) serialPortPinsDidChangeState:(EISerialPort *)port;

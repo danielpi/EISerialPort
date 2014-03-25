@@ -1158,6 +1158,9 @@
                             if ([delegate respondsToSelector:@selector(serialPortDidReceiveData:)]) {
                                 [delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
                             }
+                            if ([delegate respondsToSelector:@selector(serialPort:didReceiveData:)]) {
+                                [delegate performSelector:@selector(serialPort:didReceiveData:) withObject:self withObject:readData];
+                            }
                         });
                     }
                 }

@@ -76,6 +76,9 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
         if ([_delegate respondsToSelector:@selector(availablePortsListDidChange)] ) {
             [_delegate availablePortsListDidChange];
         }
+        if ([_delegate respondsToSelector:@selector(availablePortsListDidChangeForSelectionController:)]) {
+            [self.delegate availablePortsListDidChangeForSelectionController:self];
+        }
         // Check to see if the currently selected port has been removed
         if (![_portManager.availablePorts containsObject:self.selectedPort]) {
             [self selectPortWithName:nil];
@@ -142,6 +145,9 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     
     if ( [_delegate respondsToSelector:@selector(selectedSerialPortDidChange)] ) {
         [_delegate selectedSerialPortDidChange];
+    }
+    if ([self.delegate respondsToSelector:@selector(selectedSerialPortDidChangeForSelectionController:)]) {
+        [self.delegate selectedSerialPortDidChangeForSelectionController:self];
     }
 }
 

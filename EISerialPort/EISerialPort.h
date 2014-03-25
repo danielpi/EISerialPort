@@ -51,6 +51,14 @@ typedef enum {
 - (void) serialPortDidSendData:(NSData *)data;
 - (void) serialPortDidClose;
 - (void) serialPortPinsDidChangeState;
+
+//- (void) serialPortDidOpen:(EISerialPort *)port;
+//- (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError;
+//- (void) serialPortDidChangeSettings:(EISerialPort *)port ;
+//- (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data;
+//- (void) serialPort:(EISerialPort *)port didSendData:(NSData *)data;
+//- (void) serialPortDidClose:(EISerialPort *)port;
+//- (void) serialPortPinsDidChangeState:(EISerialPort *)port;
 @end
 
 

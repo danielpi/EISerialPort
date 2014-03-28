@@ -17,6 +17,7 @@
 - (void) availablePortsListDidChange;
 - (void) availablePortsListDidChangeForSelectionController:(EISerialPortSelectionController *)controller;
 //- (void) availablePortsListDidChangeForSelectionControllerLabelled:(NSString *)controllerLabel;
+
 - (void) selectedSerialPortDidChange;
 - (void) selectedSerialPortDidChangeForSelectionController:(EISerialPortSelectionController *)controller;
 //- (void) selectedSerialPortDidChangeForSelectionControllerLabelled:(NSString *)controllerLabel;

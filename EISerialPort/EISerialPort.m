@@ -1032,6 +1032,11 @@
     }
 }
 
+- (void) sendKeyCode:(unsigned short)keyCode
+{
+    NSData *dataToSend = [NSData dataWithBytes:&keyCode length:1];
+    [self sendData:dataToSend];
+}
 
 - (void) sendData:(NSData *)dataToSend;
 {

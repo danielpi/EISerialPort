@@ -114,6 +114,7 @@ typedef enum {
 - (void) sendString:(NSString *)aString;
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter;
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding;
+- (void) sendKeyCode:(unsigned short)keyCode;
 - (void) sendData:(NSData *)dataToSend;
 - (void) sendData:(NSData *)dataToSend inChunksOfSize:(NSNumber *)chunkSize;
 - (void) delayTransmissionForDuration:(NSTimeInterval)seconds;

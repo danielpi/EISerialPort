@@ -1056,7 +1056,7 @@
             {
                 //NSLog(@"Error setting TIOCOUTQ on %@ - %s(%d).\n", self.name, strerror(errno), errno);
             }
-            
+            //NSLog(@"ioct bytes in buffer %d",ioctlBytestInBuffer);
             roomInBuffer = self.idealBufferSize - ioctlBytestInBuffer;
             roomInBuffer = roomInBuffer > self.idealBufferSize ? self.idealBufferSize : roomInBuffer;
             
@@ -1068,6 +1068,7 @@
                 numBytes = write(self.fileDescriptor, [toBeSent bytes], [toBeSent length]);
                 if (numBytes == -1) {
                     NSLog(@"Write Error:%s", strerror( errno ));
+                    NSLog(@"ioctlBytesInBuffer %d roomInBuffer %d", ioctlBytestInBuffer, roomInBuffer);
                     [self close];
                     bytesSent = bytesSent + numBytes;
                     [self open];

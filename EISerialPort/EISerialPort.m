@@ -22,8 +22,8 @@
 
 @property (readwrite) int fileDescriptor;
 @property (readwrite) io_object_t matchedMachPort;
-@property (readwrite) struct __block termios modifiedAttributes;
-@property (readwrite) struct __block termios originalAttributes;
+@property (readwrite) __block struct termios modifiedAttributes;
+@property (readwrite) __block struct termios originalAttributes;
 
 @property (readwrite, getter = isCancelled) BOOL cancelled;
 
@@ -59,26 +59,25 @@
         _cancelled = NO;
         _matchedMachPort = iOObject;
         CFTypeRef ioKitReturn;
-        kern_return_t return_io;
         
         ioKitReturn = IORegistryEntryCreateCFProperty(_matchedMachPort, CFSTR(kIOTTYDeviceKey), kCFAllocatorDefault, 0);
-        _name = [NSString stringWithString:(__bridge NSString *)ioKitReturn];
+        _name = [NSString stringWithString:(__bridge_transfer NSString *)ioKitReturn];
         
         ioKitReturn = IORegistryEntryCreateCFProperty(_matchedMachPort, CFSTR(kIOCalloutDeviceKey), kCFAllocatorDefault, 0);
-        _path = [NSString stringWithString:(__bridge NSString *) ioKitReturn];
+        _path = [NSString stringWithString:(__bridge_transfer NSString *) ioKitReturn];
         
         // Try to look back up the IO Registry tree to see if this port is being run over Bluetooth or USB
         io_object_t parent;
-        return_io = IORegistryEntryGetParentEntry(_matchedMachPort, kIOServicePlane, &parent);
+        IORegistryEntryGetParentEntry(_matchedMachPort, kIOServicePlane, &parent);
         CFTypeRef parentClass = IOObjectCopyClass(parent);
-        NSString *parentClassString = [NSString stringWithString:(__bridge NSString *) parentClass];
+        NSString *parentClassString = [NSString stringWithString:(__bridge_transfer NSString *) parentClass];
         NSLog(@"Parent Class:%@",parentClassString);
         
         if ([parentClassString rangeOfString:@"Bluetooth"].location == NSNotFound) {
             io_object_t grandParent;
-            return_io = IORegistryEntryGetParentEntry(parent, kIOServicePlane, &grandParent);
+            IORegistryEntryGetParentEntry(parent, kIOServicePlane, &grandParent);
             CFTypeRef grandParentClass = IOObjectCopyClass(grandParent);
-            NSString *grandParentClassString = [NSString stringWithString:(__bridge NSString *) grandParentClass];
+            NSString *grandParentClassString = [NSString stringWithString:(__bridge_transfer NSString *) grandParentClass];
             NSLog(@"Grand Parent Class:%@",grandParentClassString);
             if ([grandParentClassString rangeOfString:@"USB"].location == NSNotFound) {
                 _type = EIUnknownSerialPort;
@@ -89,7 +88,7 @@
             _type = EIBluetoothSerialPort;
         }
         
-        CFRelease(ioKitReturn);
+        //CFRelease(ioKitReturn);
         _fileDescriptor = -1;
         
         _idealBufferSize = 400;
@@ -304,6 +303,7 @@
                         case EBADF:
                             description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
                             errCode = EISerialPortUnknownOpeningError;
+                            break;
                         default:
                             description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
                             errCode = EISerialPortUnknownIOCTLError;
@@ -364,60 +364,62 @@
     }
 }
 
+- (void) closeImmediately
+{
+    if ([self isOpen]) {
+        _open = NO;
+        //[self suspendReading];
+        //dispatch_source_cancel(readSource);
+        sleep(0.2);
+        //[self suspendWriting];
+        
+        //NSLog(@"%@ is being closed",[self name]);
+        // flush all input and output.
+        // Note that this call is simply passed on to the serial device driver.
+        // See tcsendbreak(3) ("man 3 tcsendbreak") for details.
+        if (tcflush([self fileDescriptor], TCIOFLUSH) == -1)
+        {
+            //@throw serialException;
+            //printf("Error waiting for drain - %s(%d).\n",
+            //       strerror(errno), errno);
+        }
+        
+        //Re-allow other processes access to the serial Port
+        if (ioctl([self fileDescriptor], TIOCNXCL) == -1)
+        {
+            //@throw serialException;
+            //NSLog(@"Error opening TIOCNXCL on %@ - %s(%d).\n", [self name], strerror(errno), errno);
+        }
+        
+        // It is good practice to reset a serial port back to the state in
+        // which you found it. This is why we saved the original termios struct
+        // The constant TCSANOW (defined in termios.h) indicates that
+        // the change should take effect immediately.
+        if (tcsetattr([self fileDescriptor], TCSANOW, &_originalAttributes) == -1)
+        {
+            //@throw serialException;
+            printf("Error resetting tty attributes - %s(%d).\n",
+                   strerror(errno), errno);
+        }
+        
+        
+        close([self fileDescriptor]);
+        self.fileDescriptor = -1;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (id delegate in self.delegates) {
+                if ([delegate respondsToSelector:@selector(serialPortDidClose)])
+                {
+                    [delegate serialPortDidClose];
+                }
+            }
+        });
+    }
+}
 
 - (void) close
 {
     dispatch_async(self.sendQueue, ^{
-        
-        if ([self isOpen]) {
-            _open = NO;
-            //[self suspendReading];
-            //dispatch_source_cancel(readSource);
-            sleep(0.2);
-            //[self suspendWriting];
-            
-            //NSLog(@"%@ is being closed",[self name]);
-            // flush all input and output.
-            // Note that this call is simply passed on to the serial device driver.
-            // See tcsendbreak(3) ("man 3 tcsendbreak") for details.
-            if (tcflush([self fileDescriptor], TCIOFLUSH) == -1)
-            {
-                //@throw serialException;
-                //printf("Error waiting for drain - %s(%d).\n",
-                //       strerror(errno), errno);
-            }
-            
-            //Re-allow other processes access to the serial Port
-            if (ioctl([self fileDescriptor], TIOCNXCL) == -1)
-            {
-                //@throw serialException;
-                //NSLog(@"Error opening TIOCNXCL on %@ - %s(%d).\n", [self name], strerror(errno), errno);
-            }
-            
-            // It is good practice to reset a serial port back to the state in
-            // which you found it. This is why we saved the original termios struct
-            // The constant TCSANOW (defined in termios.h) indicates that
-            // the change should take effect immediately.
-            if (tcsetattr([self fileDescriptor], TCSANOW, &_originalAttributes) == -1)
-            {
-                //@throw serialException;
-                printf("Error resetting tty attributes - %s(%d).\n",
-                       strerror(errno), errno);
-            }
-            
-            
-            close([self fileDescriptor]);
-            self.fileDescriptor = -1;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                for (id delegate in self.delegates) {
-                    if ([delegate respondsToSelector:@selector(serialPortDidClose)])
-                    {
-                        [delegate serialPortDidClose];
-                    }
-                }
-            });
-        }
-        
+        [self closeImmediately];
     });
 }
 
@@ -1022,13 +1024,23 @@
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
 {
     NSArray *chunks = [aString componentsSeparatedByString: delimiter];
+    NSDate *startDate;
+    
     if ([chunks count] < 2) {
         [self sendString:aString];
     } else {
+        id activity = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiated reason:@"Sending a large String"];
+        startDate = [NSDate date];
         for (NSString *chunk in chunks){
-            [self sendString:chunk];
-            [self sendString:lineEnding];
+            NSString *line = [NSString stringWithFormat:@"%@%@", chunk, lineEnding];
+            [self sendString:line];
+            //[self sendString:lineEnding];
         }
+        dispatch_async(self.sendQueue, ^{
+            [[NSProcessInfo processInfo] endActivity:activity];
+            NSTimeInterval elapsedTimeInterval = [startDate timeIntervalSinceNow];
+            NSLog(@"Download Time: %.2f", elapsedTimeInterval);
+        });
     }
 }
 
@@ -1068,15 +1080,19 @@
                 numBytes = write(self.fileDescriptor, [toBeSent bytes], [toBeSent length]);
                 if (numBytes == -1) {
                     NSLog(@"Write Error:%s", strerror( errno ));
-                    NSLog(@"ioctlBytesInBuffer %d roomInBuffer %d", ioctlBytestInBuffer, roomInBuffer);
-                    [self close];
-                    bytesSent = bytesSent + numBytes;
-                    [self open];
+                    NSLog(@"fileDescriptor: %d, toBeSentLength: %lu", self.fileDescriptor, (unsigned long)[toBeSent length]);
+                    NSLog(@"toBeSent: %@", [[NSString alloc] initWithData:toBeSent encoding:NSASCIIStringEncoding]);
+                    NSLog(@"toBeSent: %@", toBeSent);
+                    //NSLog(@"ioctlBytesInBuffer %d roomInBuffer %d", ioctlBytestInBuffer, roomInBuffer);
+                    [self closeImmediately];
+                    //bytesSent = bytesSent + numBytes;
+                    //[self open];
+                    //[self openSynchronously:nil];
                     usleep(100000);
                 } else {
                     bytesSent = bytesSent + numBytes;
                     //sent = [toBeSent subdataWithRange:NSMakeRange(0, numBytes)];
-                    
+                    usleep(10000);
                 }
             } else {
                 usleep(5000);

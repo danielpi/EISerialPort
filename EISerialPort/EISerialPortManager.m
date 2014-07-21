@@ -190,9 +190,9 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
                                      kIOTerminatedNotification,
                                      CFDictionaryCreateMutableCopy(NULL, 0, classesToMatch),
                                      (IOServiceMatchingCallback)EISerialPortRemoved,
-                                     (__bridge void *)(self), &matchingServices);
+                                     (__bridge  void *)(self), &matchingServices);
     while (IOIteratorNext(matchingServices)) {};
-    CFRelease(classesToMatch);
+    //CFRelease(classesToMatch);
 }
 
 /*

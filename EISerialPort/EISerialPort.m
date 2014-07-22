@@ -1073,7 +1073,7 @@
             roomInBuffer = roomInBuffer > self.idealBufferSize ? self.idealBufferSize : roomInBuffer;
             
             numberOfBytesToSend = (uint)MIN(roomInBuffer, ((uint)[dataToSend length] - bytesSent));
-            //NSLog(@"Number of Bytes in Buffer:%d Room in Buffer:%d Number of Bytes to send:%d",ioctlBytestInBuffer, roomInBuffer, numberOfBytesToSend);
+            NSLog(@"Number of Bytes in Buffer:%d Room in Buffer:%d Number of Bytes to send:%d",ioctlBytestInBuffer, roomInBuffer, numberOfBytesToSend);
             
             if (numberOfBytesToSend > 0) {
                 toBeSent = [dataToSend subdataWithRange:NSMakeRange(bytesSent, numberOfBytesToSend)];

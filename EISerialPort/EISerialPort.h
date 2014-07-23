@@ -80,6 +80,7 @@ typedef enum {
 @property (nonatomic, readwrite) EISerialStopBits stopBits;
 @property (nonatomic, readwrite) EISerialDataBits dataBits;
 @property (nonatomic, readwrite) EISerialFlowControl flowControl;
+@property (nonatomic, readwrite) NSNumber *latency; // Latency is measured in microseconds
 
 @property (readonly) NSArray *standardBaudRates;
 @property (readonly) NSArray *baudRateLabels;

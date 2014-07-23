@@ -13,6 +13,7 @@
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
+#include <IOKit/serial/ioss.h>
 #include <IOKit/IOBSD.h>
 
 #include <dispatch/dispatch.h>
@@ -88,10 +89,9 @@
             _type = EIBluetoothSerialPort;
         }
         
-        //CFRelease(ioKitReturn);
         _fileDescriptor = -1;
         
-        _idealBufferSize = 400;
+        _idealBufferSize = 512;
         
         _sendQueue = dispatch_queue_create("au.com.electronicinnovations.sendQueue", NULL);
         _receiveQueue = dispatch_queue_create("au.com.electronicinnovations.receiveQueue", NULL);
@@ -204,7 +204,6 @@
     return binaryRep;
 }
 
-
 #pragma mark OpenClose
 - (void) open
 {
@@ -234,17 +233,6 @@
 {
     int returnCode;
     int connectAttempts = 2;
-    //NSLog(@"Opening Port\n");
-    //NSDictionary *userInfo;
-        
-    //NSDictionary *userInfo = @{
-    //                           NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
-    //                           NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"The operation timed out.", nil),
-    //                           NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Have you tried turning it off and on again?", nil)
-    //                          };
-    //NSError *error = [NSError errorWithDomain:NSHipsterErrorDomain
-    //                                     code:-57
-    //                                 userInfo:userInfo];
     
     if ([self isOpen]) {
         return YES;
@@ -253,14 +241,12 @@
             self.fileDescriptor = open([[self path] UTF8String], O_RDWR | O_NOCTTY | O_NDELAY);
             connectAttempts = connectAttempts - 1;
         }
-        if (self.fileDescriptor == -1)
-        {
+        if (self.fileDescriptor == -1) {
             if (anError != NULL) {
                 NSString *description;
                 int errCode;
                 
                 switch (errno) {
-                        
                     default:
                         description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"");
                         errCode = EISerialPortUnknownOpeningError;
@@ -292,8 +278,7 @@
             
             //Stop any further open calls by non-root processes eg no other program can open the port
             returnCode = ioctl(self.fileDescriptor, TIOCEXCL);
-            if (returnCode == -1)
-            {
+            if (returnCode == -1) {
                 //NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
                 if (anError != NULL) {
                     NSString *description;
@@ -324,27 +309,25 @@
             }
             
             returnCode = tcgetattr(self.fileDescriptor, &_originalAttributes);
-            if (returnCode == -1)
-            {
-                //NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+            if (returnCode == -1) {
+                NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
             returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
-            if (returnCode == -1)
-            {
-                //NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+            if (returnCode == -1) {
+                NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
-            //Set the output options
-            _modifiedAttributes.c_oflag |= OPOST;	// Postprocess output (not set = raw output)
-            //modifiedAttributes.c_oflag |= ONLCR;	// Map NL to CR-NL
+            //Set options
+            _modifiedAttributes.c_oflag &= ~OPOST;	// Postprocess output (not set = raw output)
+            _modifiedAttributes.c_cflag |= CLOCAL; // Set local mode on
+            _modifiedAttributes.c_iflag |= IGNBRK;
             
-            //[self printSerialPortAttributes:modifiedAttributes];
             returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
             if (returnCode == -1)
             {
-                //NSLog(@"Failed to modify attributes for %@", self);
-                //NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                NSLog(@"Failed to modify attributes for %@", self);
+                NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
             }
             
             _open = YES;
@@ -356,6 +339,7 @@
             [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
             [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
             [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
+            [self setLatency:[NSNumber numberWithInt:1]];
             
             [self setupReceiveThread];
             
@@ -368,27 +352,19 @@
 {
     if ([self isOpen]) {
         _open = NO;
-        //[self suspendReading];
-        //dispatch_source_cancel(readSource);
         sleep(0.2);
-        //[self suspendWriting];
-        
-        //NSLog(@"%@ is being closed",[self name]);
         // flush all input and output.
         // Note that this call is simply passed on to the serial device driver.
         // See tcsendbreak(3) ("man 3 tcsendbreak") for details.
         if (tcflush([self fileDescriptor], TCIOFLUSH) == -1)
         {
-            //@throw serialException;
-            //printf("Error waiting for drain - %s(%d).\n",
-            //       strerror(errno), errno);
+            NSLog(@"Flush command failed");
         }
         
         //Re-allow other processes access to the serial Port
         if (ioctl([self fileDescriptor], TIOCNXCL) == -1)
         {
-            //@throw serialException;
-            //NSLog(@"Error opening TIOCNXCL on %@ - %s(%d).\n", [self name], strerror(errno), errno);
+            NSLog(@"TIOCNXCL Failed");
         }
         
         // It is good practice to reset a serial port back to the state in
@@ -398,7 +374,7 @@
         if (tcsetattr([self fileDescriptor], TCSANOW, &_originalAttributes) == -1)
         {
             //@throw serialException;
-            printf("Error resetting tty attributes - %s(%d).\n",
+            NSLog(@"Error resetting tty attributes - %s(%d).\n",
                    strerror(errno), errno);
         }
         
@@ -425,8 +401,6 @@
 
 
 #pragma mark Settings
-
-
 - (void) startModifyingSettings;
 {
     dispatch_async(self.sendQueue, ^ {
@@ -435,8 +409,8 @@
         returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
         if (returnCode == -1)
         {
-            //NSLog(@"Failed to read attributes for %@", self);
-            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            NSLog(@"Failed to read attributes for %@", self);
+            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
         }
     } );
 }
@@ -450,9 +424,9 @@
         returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
         if (returnCode == -1)
         {
-            //NSLog(@"Failed to modify attributes for %@", self);
-            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
-            //NSLog(@"Error setting tty attributes in endModifyingAttributes %s(%d).\n", strerror(errno), errno);
+            NSLog(@"Failed to modify attributes for %@", self);
+            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            NSLog(@"Error setting tty attributes in endModifyingAttributes %s(%d).\n", strerror(errno), errno);
         }
     } );
 }
@@ -466,8 +440,8 @@
         returnCode = tcsetattr(self.fileDescriptor, TCSAFLUSH, &_originalAttributes);
         if (returnCode == -1)
         {
-            //NSLog(@"Failed to modify attributes for %@", self);
-            //NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
+            NSLog(@"Failed to modify attributes for %@", self);
+            NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
         }
     } );
 }
@@ -482,7 +456,7 @@
     returnCode = tcgetattr([self fileDescriptor], &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Error getting tty attributes in getBaudRate");
+        NSLog(@"Error getting tty attributes in getBaudRate");
         return [NSNumber numberWithInt:returnCode];
     }
     baudRate = [NSNumber numberWithLong:cfgetispeed(&currentAttributes)];
@@ -505,9 +479,6 @@
 }
 
 
-
-
-// [serialPort setFlowControl:EIFlowControlXonXoff];
 -(EISerialFlowControl)flowControl
 {
     int returnCode;
@@ -516,10 +487,9 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
-    //
     if (currentAttributes.c_iflag & (IXON | IXOFF | IXANY)) {
         return EIFlowControlXonXoff;
     } else if (currentAttributes.c_cflag & (CCTS_OFLOW | CRTS_IFLOW)) {
@@ -536,19 +506,14 @@
         switch (method) {
             case EIFlowControlNone:
                 _modifiedAttributes.c_iflag &= ~(IXON | IXOFF | IXANY);
-                //modifiedAttributes.c_iflag &= ~(IXON | IXOFF);
-                _modifiedAttributes.c_cflag &= ~CRTSCTS;
+                _modifiedAttributes.c_cflag &= ~(CRTSCTS);
                 break;
             case EIFlowControlXonXoff:
                 _modifiedAttributes.c_iflag |= (IXON | IXOFF | IXANY);
-                //modifiedAttributes.c_iflag |= (IXON | IXANY);
-                //modifiedAttributes.c_iflag &= ~(IXOFF);
-                //modifiedAttributes.c_iflag |= (IXON | IXOFF);
                 _modifiedAttributes.c_cflag &= ~(CCTS_OFLOW | CRTS_IFLOW);
                 break;
             case EIFlowControlHardware:
                 _modifiedAttributes.c_iflag &= ~(IXON | IXOFF | IXANY);
-                //modifiedAttributes.c_iflag &= ~(IXON | IXOFF);
                 _modifiedAttributes.c_cflag |= (CCTS_OFLOW | CRTS_IFLOW);
                 break;
             default:
@@ -562,7 +527,6 @@
 }
 
 
-
 // [serialPort setParity:EIParityNone];
 -(EISerialParity)parity
 {
@@ -572,7 +536,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
     if (currentAttributes.c_cflag & PARENB) {
@@ -585,6 +549,7 @@
         return EIParityNone;
     }
 }
+
 
 -(void)setParity:(EISerialParity)parity
 {
@@ -613,6 +578,25 @@
 }
 
 
+- (void) setLatency:(NSNumber *)latency
+{
+    unsigned long mics;
+    mics = [latency unsignedLongValue]; // latency is in microseconds
+    dispatch_async(self.sendQueue, ^ {
+        if (ioctl(self.fileDescriptor, IOSSDATALAT, &mics) == -1) {
+            NSLog(@"Error setting read latency - %s(%d).\n", strerror(errno), errno);
+        }
+    });
+    // Need to set the defaults here
+}
+
+/*
+- (NSNumber *) latency
+{
+    
+}
+*/
+
 -(uint)minBytesPerRead
 {
     int returnCode;
@@ -621,7 +605,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
     return currentAttributes.c_cc[VMIN];
@@ -646,7 +630,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
     return currentAttributes.c_cc[VTIME];
@@ -696,7 +680,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
     if (currentAttributes.c_cflag & CSTOPB) {
@@ -747,7 +731,7 @@
     returnCode = tcgetattr(self.fileDescriptor, &currentAttributes);
     if (returnCode == -1)
     {
-        //NSLog(@"Failed to read attributes for %@", self);
+        NSLog(@"Failed to read attributes for %@", self);
     }
     
     EI_c_cflag = currentAttributes.c_cflag & CSIZE;
@@ -872,7 +856,7 @@
                                     @"IXANY  " : [NSNumber numberWithInt:IXANY], \
                                     @"IMAXBEL" : [NSNumber numberWithInt:IMAXBEL],};
     
-    NSLog(@"c_iflag");
+    NSLog(@"\nc_iflag");
     NSString *key;
     for(key in c_iflagsDict){
         NSLog(@"%@:%@", key, (attributes.c_iflag & [[c_iflagsDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
@@ -895,7 +879,7 @@
                                     @"OCRNL " : [NSNumber numberWithInt:OCRNL], \
                                     @"ONOCR " : [NSNumber numberWithInt:ONOCR], \
                                     @"ONLRET" : [NSNumber numberWithInt:ONLRET],};
-    NSLog(@"c_oflag");
+    NSLog(@"\nc_oflag");
     for(key in c_oflagsDict){
         NSLog(@"%@:%@", key, (attributes.c_oflag & [[c_oflagsDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
     }
@@ -916,8 +900,53 @@
      CRTSCTS     same as CCTS_OFLOW
      CRTS_IFLOW   RTS flow control of input
      MDMBUF       flow control output via Carrier
+     
+     
+      Control flags - hardware control of terminal
+     
+        #if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+        #define	CIGNORE		0x00000001	 ignore control flags
+        #endif
+        #define CSIZE		0x00000300	 character size mask
+        #define     CS5		    0x00000000	     5 bits (pseudo)
+        #define     CS6		    0x00000100	     6 bits
+        #define     CS7		    0x00000200	     7 bits
+        #define     CS8		    0x00000300	     8 bits
+        #define CSTOPB		0x00000400	 send 2 stop bits
+        #define CREAD		0x00000800	 enable receiver
+        #define PARENB		0x00001000	 parity enable
+        #define PARODD		0x00002000	 odd parity, else even
+        #define HUPCL		0x00004000	 hang up on last close
+        #define CLOCAL		0x00008000	 ignore modem status lines
+        #if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+        #define CCTS_OFLOW	0x00010000	 CTS flow control of output
+        #define CRTSCTS		(CCTS_OFLOW | CRTS_IFLOW)
+        #define CRTS_IFLOW	0x00020000	 RTS flow control of input
+        #define	CDTR_IFLOW	0x00040000	 DTR flow control of input
+        #define CDSR_OFLOW	0x00080000	 DSR flow control of output
+        #define	CCAR_OFLOW	0x00100000	 DCD flow control of output
+        #define	MDMBUF		0x00100000	 old name for CCAR_OFLOW
+        #endif
      */
-    
+    NSDictionary *c_cflagDict = @{ @"CIGNORE       " : [NSNumber numberWithInt:CIGNORE], \
+                                   @"CS6           " : [NSNumber numberWithInt:CS6], \
+                                   @"CS7           " : [NSNumber numberWithInt:CS7], \
+                                   @"2STOPB        " : [NSNumber numberWithInt:CSTOPB], \
+                                   @"CREAD         " : [NSNumber numberWithInt:CREAD], \
+                                   @"PARENB        " : [NSNumber numberWithInt:PARENB], \
+                                   @"PARODD        " : [NSNumber numberWithInt:PARODD], \
+                                   @"HUPCL         " : [NSNumber numberWithInt:HUPCL], \
+                                   @"CLOCAL        " : [NSNumber numberWithInt:CLOCAL], \
+                                   @"CCTS_OFLOW    " : [NSNumber numberWithInt:CCTS_OFLOW],
+                                   @"CRTS_IFLOW    " : [NSNumber numberWithInt:CRTS_IFLOW], \
+                                   @"CDTR_IFLOW    " : [NSNumber numberWithInt:CDTR_IFLOW], \
+                                   @"CDSR_OFLOW    " : [NSNumber numberWithInt:CDSR_OFLOW], \
+                                   @"CCAR_OFLOW    " : [NSNumber numberWithInt:CCAR_OFLOW], \
+                                   @"MDMBUF        " : [NSNumber numberWithInt:EXTPROC],  };
+    NSLog(@"\nc_cflag");
+    for(key in c_cflagDict){
+        NSLog(@"%@:%@", key, (attributes.c_cflag & [[c_cflagDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
+    }
     /* c_lflagrf
      ECHOKE       visual erase for line kill
      ECHOE        visually erase chars
@@ -952,7 +981,7 @@
                                    @"NOKERNINFO" : [NSNumber numberWithInt:NOKERNINFO], \
                                    @"NOFLSH    " : [NSNumber numberWithInt:NOFLSH], \
                                    @"PENDIN    " : [NSNumber numberWithInt:PENDIN], };
-    NSLog(@"c_lflag");
+    NSLog(@"\nc_lflag");
     for(key in c_lflagDict){
         NSLog(@"%@:%@", key, (attributes.c_lflag & [[c_lflagDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
     }
@@ -961,7 +990,6 @@
 - (float) calculateDelayPerByte:(struct termios)attributes
 {
     float delay;
-    //struct termios copiedAttributes;
     tcflag_t EI_c_cflag;
     NSNumber *baudRate;
     float delayPerBit;
@@ -1016,10 +1044,12 @@
     [self sendData:dataToSend];
 }
 
+
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter
 {
     [self sendString:aString inChunksSplitBy:delimiter replaceDelimiterWith:delimiter];
 }
+
 
 - (void) sendString:(NSString *)aString inChunksSplitBy:(NSString *)delimiter replaceDelimiterWith:(NSString *)lineEnding
 {
@@ -1034,7 +1064,6 @@
         for (NSString *chunk in chunks){
             NSString *line = [NSString stringWithFormat:@"%@%@", chunk, lineEnding];
             [self sendString:line];
-            //[self sendString:lineEnding];
         }
         dispatch_async(self.sendQueue, ^{
             [[NSProcessInfo processInfo] endActivity:activity];
@@ -1044,11 +1073,13 @@
     }
 }
 
+
 - (void) sendKeyCode:(unsigned short)keyCode
 {
     NSData *dataToSend = [NSData dataWithBytes:&keyCode length:1];
     [self sendData:dataToSend];
 }
+
 
 - (void) sendData:(NSData *)dataToSend;
 {
@@ -1066,14 +1097,14 @@
             int returnCode = ioctl(self.fileDescriptor, TIOCOUTQ, &ioctlBytestInBuffer);
             if (returnCode == -1)
             {
-                //NSLog(@"Error setting TIOCOUTQ on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+                NSLog(@"Error setting TIOCOUTQ on %@ - %s(%d).\n", self.name, strerror(errno), errno);
             }
             //NSLog(@"ioct bytes in buffer %d",ioctlBytestInBuffer);
             roomInBuffer = self.idealBufferSize - ioctlBytestInBuffer;
             roomInBuffer = roomInBuffer > self.idealBufferSize ? self.idealBufferSize : roomInBuffer;
             
             numberOfBytesToSend = (uint)MIN(roomInBuffer, ((uint)[dataToSend length] - bytesSent));
-            NSLog(@"Number of Bytes in Buffer:%d Room in Buffer:%d Number of Bytes to send:%d",ioctlBytestInBuffer, roomInBuffer, numberOfBytesToSend);
+            //NSLog(@"Number of Bytes in Buffer:%d Room in Buffer:%d Number of Bytes to send:%d",ioctlBytestInBuffer, roomInBuffer, numberOfBytesToSend);
             
             if (numberOfBytesToSend > 0) {
                 toBeSent = [dataToSend subdataWithRange:NSMakeRange(bytesSent, numberOfBytesToSend)];
@@ -1083,16 +1114,12 @@
                     NSLog(@"fileDescriptor: %d, toBeSentLength: %lu", self.fileDescriptor, (unsigned long)[toBeSent length]);
                     NSLog(@"toBeSent: %@", [[NSString alloc] initWithData:toBeSent encoding:NSASCIIStringEncoding]);
                     NSLog(@"toBeSent: %@", toBeSent);
-                    //NSLog(@"ioctlBytesInBuffer %d roomInBuffer %d", ioctlBytestInBuffer, roomInBuffer);
+                    
                     [self closeImmediately];
-                    //bytesSent = bytesSent + numBytes;
-                    //[self open];
-                    //[self openSynchronously:nil];
                     usleep(100000);
                 } else {
                     bytesSent = bytesSent + numBytes;
-                    //sent = [toBeSent subdataWithRange:NSMakeRange(0, numBytes)];
-                    usleep(10000);
+                    usleep(1000); // 1ms delay per line
                 }
             } else {
                 usleep(5000);
@@ -1113,19 +1140,21 @@
     dispatch_async(self.sendQueue, writeData);
 }
 
+
 - (void) sendData:(NSData *)dataToSend inChunksOfSize:(NSNumber *)chunkSize
 {
     
 }
+
 
 - (void) delayTransmissionForDuration:(NSTimeInterval)seconds
 {
     dispatch_async(self.sendQueue, ^{ usleep((int)(1000000 * seconds)); });
 }
 
+
 -(void)sendBreak
 {
-    //BOOL result = (tcsendbreak(fileDescriptor, 0) != -1);
     tcsendbreak(self.fileDescriptor, 0);
 }
 

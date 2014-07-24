@@ -1,8 +1,8 @@
 # EISerialPort
 
-A Serial Port Framework for rapidly developing apps that talk to micro controllers.
+A Cocoa serial port framework for rapidly developing apps that talk to micro-controllers.
 
-Micro controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds gives a great opportunity to improve both areas. This should be simple to achieve.
+Micro-controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds gives a great opportunity to improve both areas. This should be simple to achieve.
 
 ## How to use this library
 

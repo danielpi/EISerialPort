@@ -560,3 +560,15 @@ Needs to be able to show
 - should give a popup explaining the fault that occurred
 
 
+## Improvements
+
+I'm planning on working my way through Matt Gemmell's advice on API design (http://mattgemmell.com/api-design/). His advice seems so obvious when I read it yet when I look at my code I see so many possible improvements. Therefore I think I should work through his advice and treat it as a checklist.
+
+### EISerialPortSelectionController.h
+- **What is the class?** The EISerialPortSelectionController is in charger of the selection of the serial port by the end user. It provides a list of available ports, keeps track of which port is selected, stores a record of which port was selected during the last running of the application.
+
+- **What is the class like?** I'm not sure. It looks to me like the selection section of Cocoa bindings is exactly what I am trying to replicate. However I struggle to get my head around cocoa bindings and I want this class to be easier to understand.
+
+
+
+

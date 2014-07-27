@@ -40,6 +40,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
 
 - (id) init
 {
+    // Would be good if the auto generated label could be gauranteed to be unique but repeatable. 
     self = [[EISerialPortSelectionController alloc] initWithLabel:@"EISerialPort_defaultPortLabel"];
     return self;
 }

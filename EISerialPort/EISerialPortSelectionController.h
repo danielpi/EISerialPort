@@ -30,14 +30,14 @@ extern NSString * const EISelectedSerialPortNameKey;
 @interface EISerialPortSelectionController : NSObject
 
 @property (readwrite, unsafe_unretained) id delegate;
-@property (readonly, strong) NSString *label;
-@property (readonly, weak) EISerialPort *selectedPort;
+@property (readonly, strong) NSString *label;   // Used to identify each instance in the defaults
+@property (readonly, weak) EISerialPort *selectedPort;  // Defaults to the port that was selected when your app was last open. Nil if that port is no longer available.
 @property (readonly, strong) NSIndexSet *selectedPortIndex;
 
-- (id)initWithLabel:(NSString *)label;
+- (id)initWithLabel:(NSString *)label; // Use a label that describes the section of your app that this port will be used for
 - (void)selectPortWithName:(NSString *)portName;
 
-- (NSArray *)availablePorts;
-- (NSArray *)popUpButtonDetails;
+- (NSArray *)availablePorts;    // Always sorted alphabetically
+- (NSArray *)popUpButtonDetails;    // An array of dictionaries with keys of "name" and "enabled"
 
 @end

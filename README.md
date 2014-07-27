@@ -569,6 +569,14 @@ I'm planning on working my way through Matt Gemmell's advice on API design (http
 
 - **What is the class like?** I'm not sure. It looks to me like the selection section of Cocoa bindings is exactly what I am trying to replicate. However I struggle to get my head around cocoa bindings and I want this class to be easier to understand.
 
+Rule #1 - Looks fine to me
+Rule #2 - EISerialPort has its own project
+Rule #3 - The delegate isn't required so don't include it in the initialiser. The label is more important though.
+Rule #4 - Label is accessible as a readonly property
+Rule #5 - Done
+Rule #6 - Only one line required to get up and going.
+Rule #7 - Could definitely use work here.
+Rule #8 - 
 
 
 

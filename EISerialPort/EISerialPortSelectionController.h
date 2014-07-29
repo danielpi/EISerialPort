@@ -7,37 +7,39 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "EISerialPortManager.h"
 
 @class EISerialPort;
 @class EISerialPortSelectionController;
 
-@protocol EISerialPortSelectionDelegate
 
-- (void) availablePortsListDidChange;
-- (void) availablePortsListDidChangeForSelectionController:(EISerialPortSelectionController *)controller;
-//- (void) availablePortsListDidChangeForSelectionControllerLabelled:(NSString *)controllerLabel;
+@protocol EISerialPortSelectionDelegate <NSObject>
+@optional
+- (void) availablePortsForSelectionControllerDidChange:(EISerialPortSelectionController *)controller;
 
-- (void) selectedSerialPortDidChange;
-- (void) selectedSerialPortDidChangeForSelectionController:(EISerialPortSelectionController *)controller;
-//- (void) selectedSerialPortDidChangeForSelectionControllerLabelled:(NSString *)controllerLabel;
+- (BOOL) selectedPortForSelectionControllerShouldChange:(EISerialPortSelectionController *)controller;
+- (void) selectedPortForSelectionControllerWillChange:(EISerialPortSelectionController *)controller;
+- (void) selectedPortForSelectionControllerDidChange:(EISerialPortSelectionController *)controller;
 @end
 
-
-extern NSString * const EISelectedSerialPortNameKey;
 
 
 @interface EISerialPortSelectionController : NSObject
 
-@property (readwrite, unsafe_unretained) id delegate;
+@property (readwrite, unsafe_unretained) id<EISerialPortSelectionDelegate> delegate;
 @property (readonly, strong) NSString *label;   // Used to identify each instance in the defaults
 @property (readonly, weak) EISerialPort *selectedPort;  // Defaults to the port that was selected when your app was last open. Nil if that port is no longer available.
 @property (readonly, strong) NSIndexSet *selectedPortIndex;
 
 - (id)initWithLabel:(NSString *)label; // Use a label that describes the section of your app that this port will be used for
-- (void)selectPortWithName:(NSString *)portName;
+- (id)initWithLabel:(NSString *)label delegate:(id<EISerialPortSelectionDelegate>) delegate;
+
+- (BOOL)selectPortWithName:(NSString *)portName; // Return value indicates if the change was successful or not
 
 - (NSArray *)availablePorts;    // Always sorted alphabetically
 - (NSArray *)popUpButtonDetails;    // An array of dictionaries with keys of "name" and "enabled"
 
 @end
+
+
+
+extern NSString * const EISelectedSerialPortNameKey;

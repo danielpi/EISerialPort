@@ -191,25 +191,34 @@
 
 
 #pragma mark EISerialPortSelectionDelegate
-
-- (void) selectedSerialPortDidChange
-{
-    if (self.portSelectionController.selectedPort != nil) {
-        [[self.portSelectionController selectedPort] setDelegate:self];
-    }
-    [self updateSerialPortUI];
-}
-
-- (void) availablePortsListDidChange
+- (void) availablePortsForSelectionControllerDidChange:(EISerialPortSelectionController *)controller
 {
     [self.serialPortSelectionPopUp removeAllItems];
     
-    for (NSDictionary *portDetails in self.portSelectionController.popUpButtonDetails){
+    for (NSDictionary *portDetails in controller.popUpButtonDetails){
         NSString *portName = [portDetails valueForKey:@"name"];
         BOOL portEnabled = [[portDetails valueForKey:@"enabled"] boolValue];
         [self.serialPortSelectionPopUp addItemWithTitle:portName];
         [[self.serialPortSelectionPopUp itemWithTitle:portName] setEnabled:portEnabled];
     }
+}
+
+- (BOOL) selectedPortForSelectionControllerShouldChange:(EISerialPortSelectionController *)controller
+{
+    return YES;
+}
+
+- (void) selectedPortForSelectionControllerWillChange:(EISerialPortSelectionController *)controller
+{
+    [controller.selectedPort setDelegate:nil];
+}
+
+- (void) selectedPortForSelectionControllerDidChange:(EISerialPortSelectionController *)controller
+{
+    if (controller.selectedPort != nil) {
+        [controller.selectedPort setDelegate:self];
+    }
+    [self updateSerialPortUI];
 }
 
 

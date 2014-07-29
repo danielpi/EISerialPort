@@ -30,10 +30,10 @@ typedef enum {
 } EISerialFlowControl;
 
 typedef enum {
-    EIFiveDataBits          = 0,
-    EISixDataBits           = 1,
-    EISevenDataBits         = 2,
-    EIEightDataBits         = 3
+    EIDataBitsFive          = 0,
+    EIDataBitsSix           = 1,
+    EIDataBitsSeven         = 2,
+    EIDataBitsEight         = 3
 } EISerialDataBits;
 
 typedef enum {
@@ -44,7 +44,7 @@ typedef enum {
 
 
 
-@protocol EISerialDelegate
+@protocol EISerialDelegate <NSObject>
 
 @optional
 - (void) serialPortDidOpen;

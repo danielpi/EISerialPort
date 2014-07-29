@@ -737,19 +737,19 @@
     EI_c_cflag = currentAttributes.c_cflag & CSIZE;
     switch (EI_c_cflag) {
         case CS5:
-            return EIFiveDataBits;
+            return EIDataBitsFive;
             break;
         case CS6:
-            return EISixDataBits;
+            return EIDataBitsSix;
             break;
         case CS7:
-            return EISevenDataBits;
+            return EIDataBitsSeven;
             break;
         case CS8:
-            return EIEightDataBits;
+            return EIDataBitsEight;
             break;
         default:
-            return EIFiveDataBits;
+            return EIDataBitsFive;
             break;
     }
 }
@@ -760,16 +760,16 @@
     dispatch_async(self.sendQueue, ^ {
         _modifiedAttributes.c_cflag &= ~CSIZE;
         switch (dataBits) {
-            case EIFiveDataBits:
+            case EIDataBitsFive:
                 _modifiedAttributes.c_cflag |= CS5;
                 break;
-            case EISixDataBits:
+            case EIDataBitsSix:
                 _modifiedAttributes.c_cflag |= CS6;
                 break;
-            case EISevenDataBits:
+            case EIDataBitsSeven:
                 _modifiedAttributes.c_cflag |= CS7;
                 break;
-            case EIEightDataBits:
+            case EIDataBitsEight:
                 _modifiedAttributes.c_cflag |= CS8;
                 break;
             default:

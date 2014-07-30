@@ -103,30 +103,27 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
     return [_availablePorts count];
 }
 
+
 - (NSEnumerator *)enumeratorOfAvailablePorts
 {
     return [_availablePorts objectEnumerator];
 }
+
 
 - (EISerialPort *)memberOfAvailablePorts:(EISerialPort *)anObject
 {
     return [_availablePorts member:anObject];
 }
 
+
 - (void) addAvailablePortsObject:(EISerialPort *)port
 {
     [_availablePorts addObject:port];
-    //NSLog(@"Added %@", port);
-    //[[NSNotificationCenter defaultCenter] postNotificationName:@"EISerialPortAdded"
-    //                                                    object:self];
 }
 
 - (void) removeAvailablePortsObject:(EISerialPort *)port
 {
     [_availablePorts removeObject:port];
-    //NSLog(@"Removed %@", port);
-    //[[NSNotificationCenter defaultCenter] postNotificationName:@"EISerialPortRemoved"
-    //                                                    object:self];
 }
 
 
@@ -178,6 +175,13 @@ void EISerialPortRemoved(id self, io_iterator_t iter);
     
     CFRunLoopAddSource(CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(notificationPort), kCFRunLoopCommonModes);
     
+    // Notification types
+    // #define kIOPublishNotification		"IOServicePublish"
+    // #define kIOFirstPublishNotification	"IOServiceFirstPublish"
+    // #define kIOMatchedNotification		"IOServiceMatched"
+    // #define kIOFirstMatchNotification	"IOServiceFirstMatch"
+    // #define kIOTerminatedNotification	"IOServiceTerminate"
+    
     // NOTE IOServiceAddMatchingNotification uses the dictionary, so we pass a copy
     IOServiceAddMatchingNotification(notificationPort,
                                      kIOPublishNotification,
@@ -211,10 +215,7 @@ void EISerialPortAdded(id self, io_iterator_t iter)
     io_registry_entry_t serialPort;
     while ((serialPort = IOIteratorNext(iter))) {
         serialObject = [[EISerialPort alloc] initWithIOObject:serialPort];
-        //[self addSerialPort: serialPort];
         [self addAvailablePortsObject:serialObject];
-        //[[self availablePorts] addObject:serialObject];
-        //IOObjectRelease(serialPort);
     }
 }
 
@@ -225,12 +226,9 @@ void EISerialPortRemoved(id self, io_iterator_t iter)
     io_registry_entry_t serialPort;
     while ((serialPort = IOIteratorNext(iter))) {
         serialObject = [[EISerialPort alloc] initWithIOObject:serialPort];
-        //NSLog(@"port to Delete:%@\n", serialObject);
         [self removeAvailablePortsObject:serialObject];
-        //[[self availablePorts] removeObject:serialObject];
         IOObjectRelease(serialPort);
     }
-    //NSLog(@"Remaining Ports:%@", [self portsSet]);
 }
 
 

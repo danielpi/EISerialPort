@@ -60,7 +60,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     EISerialPort *defaultPort = [_portManager serialPortWithName:selectedPortName];
     
     NSLog(@"Default port:%@", defaultPort);
-    NSLog(@"Available ports:%@", _portManager.availablePorts);
+    //NSLog(@"Available ports:%@", _portManager.availablePorts);
     
     if ([defaultPort isNotEqualTo:nil]) {
         [self selectPortWithName:selectedPortName];
@@ -74,12 +74,12 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
                        context:(void *)context
 {
     if ([keyPath isEqual:@"availablePorts"]) {
+        // Check to see if the currently selected port has been removed
+        if (![self.portManager.availablePorts containsObject:self.selectedPort] && (self.selectedPort != nil)) {
+            [self selectPortWithName:nil];
+        }
         if ([self.delegate respondsToSelector:@selector(availablePortsForSelectionControllerDidChange:)]) {
             [self.delegate availablePortsForSelectionControllerDidChange:self];
-        }
-        // Check to see if the currently selected port has been removed
-        if (![self.portManager.availablePorts containsObject:self.selectedPort]) {
-            [self selectPortWithName:nil];
         }
     }
     /*

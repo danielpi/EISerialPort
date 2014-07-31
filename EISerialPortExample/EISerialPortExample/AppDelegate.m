@@ -224,30 +224,24 @@
 
 #pragma mark EISerialDelegate
 
-- (void) serialPortDidOpen
+- (void) serialPortDidOpen:(EISerialPort *)port
 {
     [self updateSerialPortUI];
     NSLog(@"Port Opened: %@", [self.portSelectionController selectedPort]);
 }
 
-- (void) serialPortFailedToOpen
-{
-    [self updateSerialPortUI];
-    NSLog(@"Port Failed to Open: %@", [self.portSelectionController selectedPort]);
-}
-
-- (void) serialPortDidClose
+- (void) serialPortDidClose:(EISerialPort *)port
 {
     [self updateSerialPortUI];
     NSLog(@"Port Closed: %@", [self.portSelectionController selectedPort]);
 }
 
-- (void) serialPortDidReceiveData:(NSData *)data
+- (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data
 {
     [self.terminalView appendCharacters:data];
 }
 
-- (void) serialPortExperiencedAnError:(NSError *)anError
+- (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError
 {
     [[self window] presentError:anError];
 }

@@ -204,6 +204,56 @@
     return binaryRep;
 }
 
+
+#pragma mark Delegate Assistance methods
+/*
+ - (BOOL) serialPortShouldOpen:(EISerialPort *)port;
+ - (void) serialPortWillOpen:(EISerialPort *)port;
+ - (void) serialPortDidOpen:(EISerialPort *)port;
+ 
+ - (BOOL) serialPortShouldClose:(EISerialPort *)port;
+ - (void) serialPortWillClose:(EISerialPort *)port;
+ - (void) serialPortDidClose:(EISerialPort *)port;
+ 
+ - (BOOL) serialPortShouldChangeSettings:(EISerialPort *)port;
+ - (void) serialPortWillChangeSettings:(EISerialPort *)port;
+ - (void) serialPortDidChangeSettings:(EISerialPort *)port;
+ 
+ - (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError;
+ 
+ - (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data;
+ 
+ - (BOOL) serialPort:(EISerialPort *)port shouldSendData:(NSData *)data;
+ - (void) serialPort:(EISerialPort *)port willSendData:(NSData *)data;
+ - (void) serialPort:(EISerialPort *)port didSendData:(NSData *)data;
+ 
+ - (void) serialPortPinsDidChangeState:(EISerialPort *)port;
+ */
+
+- (BOOL) portShouldOpen
+{
+    BOOL reply = YES;
+    for (id delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(serialPortShouldOpen:)])
+        {
+            if (![delegate serialPortShouldOpen:self]) {
+                reply = NO;
+            }
+        }
+    }
+    return reply;
+}
+
+- (void) reportErrorToDelegate:(NSError *)error
+{
+    for (id delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(serialPort:experiencedAnError:)])
+        {
+            [delegate serialPort:self experiencedAnError:error];
+        }
+    }
+}
+
 #pragma mark OpenClose
 - (void) open
 {
@@ -216,12 +266,7 @@
         BOOL success = [self openSynchronously:&error];
         
         if (!success) {
-            for (id delegate in self.delegates) {
-                if ([delegate respondsToSelector:@selector(serialPortExperiencedAnError:)])
-                {
-                    [delegate serialPortExperiencedAnError:error];
-                }
-            }
+            [self reportErrorToDelegate:error];
         }
     };
     
@@ -237,61 +282,20 @@
     if ([self isOpen]) {
         return YES;
     } else {
-        while (connectAttempts > 0 & self.fileDescriptor == -1) {
-            self.fileDescriptor = open([[self path] UTF8String], O_RDWR | O_NOCTTY | O_NDELAY);
-            connectAttempts = connectAttempts - 1;
-        }
-        if (self.fileDescriptor == -1) {
-            if (anError != NULL) {
-                NSString *description;
-                int errCode;
-                
-                switch (errno) {
-                    default:
-                        description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"");
-                        errCode = EISerialPortUnknownOpeningError;
-                        break;
-                }
-                
-                // Create the underlying error.
-                NSError *underlyingError = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain
-                                                                      code:errno userInfo:nil];
-                // Create and return the custom domain error.
-                NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : description,
-                                                   NSUnderlyingErrorKey : underlyingError,
-                                                   NSFilePathErrorKey : [self path] };
-                
-                *anError = [[NSError alloc] initWithDomain:@"au.com.electronicinnovations.EISerialPort"
-                                                      code:errCode userInfo:errorDictionary];
+        if ([self portShouldOpen]) {
+            while (connectAttempts > 0 & self.fileDescriptor == -1) {
+                self.fileDescriptor = open([[self path] UTF8String], O_RDWR | O_NOCTTY | O_NDELAY);
+                connectAttempts = connectAttempts - 1;
             }
-            return NO;
-        } else {
-            // Notify of successful opening
-            dispatch_async(dispatch_get_main_queue(), ^{
-                for (id delegate in self.delegates) {
-                    if ([delegate respondsToSelector:@selector(serialPortDidOpen)])
-                    {
-                        [delegate serialPortDidOpen];
-                    }
-                }
-            });
-            
-            //Stop any further open calls by non-root processes eg no other program can open the port
-            returnCode = ioctl(self.fileDescriptor, TIOCEXCL);
-            if (returnCode == -1) {
-                //NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+            if (self.fileDescriptor == -1) {
                 if (anError != NULL) {
                     NSString *description;
                     int errCode;
                     
                     switch (errno) {
-                        case EBADF:
-                            description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
-                            errCode = EISerialPortUnknownOpeningError;
-                            break;
                         default:
-                            description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
-                            errCode = EISerialPortUnknownIOCTLError;
+                            description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"");
+                            errCode = EISerialPortUnknownOpeningError;
                             break;
                     }
                     
@@ -306,44 +310,90 @@
                     *anError = [[NSError alloc] initWithDomain:@"au.com.electronicinnovations.EISerialPort"
                                                           code:errCode userInfo:errorDictionary];
                 }
+                return NO;
+            } else {
+                // Notify of successful opening
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    for (id delegate in self.delegates) {
+                        if ([delegate respondsToSelector:@selector(serialPortDidOpen:)])
+                        {
+                            [delegate serialPortDidOpen:self];
+                        }
+                    }
+                });
+                
+                //Stop any further open calls by non-root processes eg no other program can open the port
+                returnCode = ioctl(self.fileDescriptor, TIOCEXCL);
+                if (returnCode == -1) {
+                    //NSLog(@"Error setting TIOCEXCL on %@ - %s(%d).\n", self.name, strerror(errno), errno);
+                    if (anError != NULL) {
+                        NSString *description;
+                        int errCode;
+                        
+                        switch (errno) {
+                            case EBADF:
+                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                                errCode = EISerialPortUnknownOpeningError;
+                                break;
+                            default:
+                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                                errCode = EISerialPortUnknownIOCTLError;
+                                break;
+                        }
+                        
+                        // Create the underlying error.
+                        NSError *underlyingError = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain
+                                                                              code:errno userInfo:nil];
+                        // Create and return the custom domain error.
+                        NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : description,
+                                                           NSUnderlyingErrorKey : underlyingError,
+                                                           NSFilePathErrorKey : [self path] };
+                        
+                        *anError = [[NSError alloc] initWithDomain:@"au.com.electronicinnovations.EISerialPort"
+                                                              code:errCode userInfo:errorDictionary];
+                    }
+                }
+                
+                returnCode = tcgetattr(self.fileDescriptor, &_originalAttributes);
+                if (returnCode == -1) {
+                    NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                }
+                
+                returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
+                if (returnCode == -1) {
+                    NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                }
+                
+                //Set options
+                _modifiedAttributes.c_oflag &= ~OPOST;	// Postprocess output (not set = raw output)
+                _modifiedAttributes.c_cflag |= CLOCAL; // Set local mode on
+                _modifiedAttributes.c_iflag |= IGNBRK;
+                
+                returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
+                if (returnCode == -1)
+                {
+                    NSLog(@"Failed to modify attributes for %@", self);
+                    NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
+                }
+                
+                _open = YES;
+                
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                
+                [self setBaudRate:[defaults objectForKey:[NSString stringWithFormat:@"%@-baudRate", self.name]]];
+                [self setDataBits:(EISerialDataBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-dataBits", self.name]] integerValue]];
+                [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
+                [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
+                [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
+                [self setLatency:[NSNumber numberWithInt:1]];
+                
+                [self setupReceiveThread];
+                
+                return YES;
             }
             
-            returnCode = tcgetattr(self.fileDescriptor, &_originalAttributes);
-            if (returnCode == -1) {
-                NSLog(@"Error getting original tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
-            }
-            
-            returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
-            if (returnCode == -1) {
-                NSLog(@"Error getting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
-            }
-            
-            //Set options
-            _modifiedAttributes.c_oflag &= ~OPOST;	// Postprocess output (not set = raw output)
-            _modifiedAttributes.c_cflag |= CLOCAL; // Set local mode on
-            _modifiedAttributes.c_iflag |= IGNBRK;
-            
-            returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
-            if (returnCode == -1)
-            {
-                NSLog(@"Failed to modify attributes for %@", self);
-                NSLog(@"Error setting tty attributes in openByBlocking %s(%d).\n", strerror(errno), errno);
-            }
-            
-            _open = YES;
-            
-            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-            
-            [self setBaudRate:[defaults objectForKey:[NSString stringWithFormat:@"%@-baudRate", self.name]]];
-            [self setDataBits:(EISerialDataBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-dataBits", self.name]] integerValue]];
-            [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
-            [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
-            [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
-            [self setLatency:[NSNumber numberWithInt:1]];
-            
-            [self setupReceiveThread];
-            
-            return YES;
+        } else {
+            return NO;
         }
     }
 }
@@ -383,9 +433,9 @@
         self.fileDescriptor = -1;
         dispatch_async(dispatch_get_main_queue(), ^{
             for (id delegate in self.delegates) {
-                if ([delegate respondsToSelector:@selector(serialPortDidClose)])
+                if ([delegate respondsToSelector:@selector(serialPortDidClose:)])
                 {
-                    [delegate serialPortDidClose];
+                    [delegate serialPortDidClose:self];
                 }
             }
         });
@@ -1129,9 +1179,9 @@
         [self setCancelled:NO];
         
         for (id delegate in self.delegates) {
-            if ([delegate respondsToSelector:@selector(serialPortDidSendData:)])
+            if ([delegate respondsToSelector:@selector(serialPort:didSendData:)])
             {
-                [delegate performSelector:@selector(serialPortDidSendData:) withObject:dataToSend];
+                [delegate performSelector:@selector(serialPort:didSendData:) withObject:self withObject:dataToSend];
             }
         }
         
@@ -1206,9 +1256,6 @@
                 if (readData != nil) {
                     for (id delegate in self.delegates) {
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            if ([delegate respondsToSelector:@selector(serialPortDidReceiveData:)]) {
-                                [delegate performSelector:@selector(serialPortDidReceiveData:) withObject:readData];
-                            }
                             if ([delegate respondsToSelector:@selector(serialPort:didReceiveData:)]) {
                                 [delegate performSelector:@selector(serialPort:didReceiveData:) withObject:self withObject:readData];
                             }

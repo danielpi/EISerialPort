@@ -47,21 +47,28 @@ typedef enum {
 @protocol EISerialDelegate <NSObject>
 
 @optional
-- (void) serialPortDidOpen;
-- (void) serialPortExperiencedAnError:(NSError *)anError;
-- (void) serialPortDidChangeSettings;
-- (void) serialPortDidReceiveData:(NSData *)data;
-- (void) serialPortDidSendData:(NSData *)data;
-- (void) serialPortDidClose;
-- (void) serialPortPinsDidChangeState;
 
-//- (void) serialPortDidOpen:(EISerialPort *)port;
-//- (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError;
-//- (void) serialPortDidChangeSettings:(EISerialPort *)port ;
+- (BOOL) serialPortShouldOpen:(EISerialPort *)port;
+- (void) serialPortWillOpen:(EISerialPort *)port;
+- (void) serialPortDidOpen:(EISerialPort *)port;
+
+- (BOOL) serialPortShouldClose:(EISerialPort *)port;
+- (void) serialPortWillClose:(EISerialPort *)port;
+- (void) serialPortDidClose:(EISerialPort *)port;
+
+- (BOOL) serialPortShouldChangeSettings:(EISerialPort *)port;
+- (void) serialPortWillChangeSettings:(EISerialPort *)port;
+- (void) serialPortDidChangeSettings:(EISerialPort *)port;
+
+- (void) serialPort:(EISerialPort *)port experiencedAnError:(NSError *)anError;
+
 - (void) serialPort:(EISerialPort *)port didReceiveData:(NSData *)data;
-//- (void) serialPort:(EISerialPort *)port didSendData:(NSData *)data;
-//- (void) serialPortDidClose:(EISerialPort *)port;
-//- (void) serialPortPinsDidChangeState:(EISerialPort *)port;
+
+- (BOOL) serialPort:(EISerialPort *)port shouldSendData:(NSData *)data;
+- (void) serialPort:(EISerialPort *)port willSendData:(NSData *)data;
+- (void) serialPort:(EISerialPort *)port didSendData:(NSData *)data;
+
+- (void) serialPortPinsDidChangeState:(EISerialPort *)port;
 @end
 
 
@@ -71,16 +78,16 @@ typedef enum {
 @property (readonly, strong) NSString *path;
 @property (readonly) EISerialPortType type;
 @property (readonly, getter = isOpen) BOOL open;
-@property (readonly, getter = isCancelled) BOOL cancelled;
+@property (readonly, getter = isCancelled) BOOL cancelled; // What is cancelled? Writing I think
 
 @property (readwrite, weak, nonatomic) id delegate;
 
-@property (nonatomic, readwrite) NSNumber *baudRate;
-@property (nonatomic, readwrite) EISerialParity parity;
-@property (nonatomic, readwrite) EISerialStopBits stopBits;
-@property (nonatomic, readwrite) EISerialDataBits dataBits;
-@property (nonatomic, readwrite) EISerialFlowControl flowControl;
-@property (nonatomic, readwrite) NSNumber *latency; // Latency is measured in microseconds
+@property (readwrite) NSNumber *baudRate;
+@property (readwrite) EISerialParity parity;
+@property (readwrite) EISerialStopBits stopBits;
+@property (readwrite) EISerialDataBits dataBits;
+@property (readwrite) EISerialFlowControl flowControl;
+@property (readwrite, nonatomic) NSNumber *latency; // Latency is measured in microseconds
 
 @property (readonly) NSArray *standardBaudRates;
 @property (readonly) NSArray *baudRateLabels;
@@ -89,23 +96,24 @@ typedef enum {
 @property (readonly) NSArray *dataBitLabels;
 @property (readonly) NSArray *flowControlLabels;
 
-@property (nonatomic, readwrite) uint minBytesPerRead;
-@property (nonatomic, readwrite) uint timeout;
+@property (readwrite) uint minBytesPerRead;
+@property (readwrite) uint timeout;
 
-@property (nonatomic) BOOL RTS;
-@property (nonatomic) BOOL DTR;
-@property (nonatomic, readonly) BOOL CTS;
-@property (nonatomic, readonly) BOOL DSR;
-@property (nonatomic, readonly) BOOL DCD;
+@property (readwrite) BOOL RTS;
+@property (readwrite) BOOL DTR;
+@property (readonly) BOOL CTS;
+@property (readonly) BOOL DSR;
+@property (readonly) BOOL DCD;
+
 
 // You shouldn't directly initialise your own EISerialPort Object.
 // Get one from the EISerialPortManager instead.
 - (id) initWithIOObject:(io_object_t) iOObject;
 
 - (NSString *) description;
-+ (NSArray *) standardBaudRates;
++ (NSArray *) standardBaudRates;    // Returns an array of 
 
-- (void) addDelegate:(id)aDelegate;
+- (void) addDelegate:(id)aDelegate;     // This allows for multiple broadcast of data that comes in from the serial port
 - (void) removeDelegate:(id)aDelegate;
 
 - (void) open;

@@ -230,6 +230,19 @@
  - (void) serialPortPinsDidChangeState:(EISerialPort *)port;
  */
 
+- (void) performSelectorForDelegates:(SEL)selector
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        for (id delegate in self.delegates) {
+            if ([delegate respondsToSelector:selector])
+            {
+                [delegate performSelector:selector withObject:self];
+            }
+        }
+    });
+}
+
+// This will be called on the serial ports background thread.
 - (BOOL) portShouldOpen
 {
     BOOL reply = YES;
@@ -246,12 +259,14 @@
 
 - (void) reportErrorToDelegate:(NSError *)error
 {
-    for (id delegate in self.delegates) {
-        if ([delegate respondsToSelector:@selector(serialPort:experiencedAnError:)])
-        {
-            [delegate serialPort:self experiencedAnError:error];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        for (id delegate in self.delegates) {
+            if ([delegate respondsToSelector:@selector(serialPort:experiencedAnError:)])
+            {
+                [delegate serialPort:self experiencedAnError:error];
+            }
         }
-    }
+    });
 }
 
 #pragma mark OpenClose
@@ -283,6 +298,7 @@
         return YES;
     } else {
         if ([self portShouldOpen]) {
+            [self performSelectorForDelegates:@selector(serialPortWillOpen:)];
             while (connectAttempts > 0 & self.fileDescriptor == -1) {
                 self.fileDescriptor = open([[self path] UTF8String], O_RDWR | O_NOCTTY | O_NDELAY);
                 connectAttempts = connectAttempts - 1;
@@ -313,14 +329,15 @@
                 return NO;
             } else {
                 // Notify of successful opening
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    for (id delegate in self.delegates) {
-                        if ([delegate respondsToSelector:@selector(serialPortDidOpen:)])
-                        {
-                            [delegate serialPortDidOpen:self];
-                        }
-                    }
-                });
+                [self performSelectorForDelegates:@selector(serialPortDidOpen:)];
+                //dispatch_async(dispatch_get_main_queue(), ^{
+                //    for (id delegate in self.delegates) {
+                //        if ([delegate respondsToSelector:@selector(serialPortDidOpen:)])
+                //        {
+                //            [delegate serialPortDidOpen:self];
+                //        }
+                //    }
+                //});
                 
                 //Stop any further open calls by non-root processes eg no other program can open the port
                 returnCode = ioctl(self.fileDescriptor, TIOCEXCL);
@@ -398,9 +415,29 @@
     }
 }
 
+/*
+ - (BOOL) serialPortShouldClose:(EISerialPort *)port;
+ - (void) serialPortWillClose:(EISerialPort *)port;
+ - (void) serialPortDidClose:(EISerialPort *)port;
+ */
+- (BOOL) portShouldClose
+{
+    BOOL reply = YES;
+    for (id delegate in self.delegates) {
+        if ([delegate respondsToSelector:@selector(serialPortShouldClose:)])
+        {
+            if (![delegate serialPortShouldClose:self]) {
+                reply = NO;
+            }
+        }
+    }
+    return reply;
+}
+
+
 - (void) closeImmediately
 {
-    if ([self isOpen]) {
+    if ([self isOpen] && [self portShouldClose]) {
         _open = NO;
         sleep(0.2);
         // flush all input and output.
@@ -428,17 +465,10 @@
                    strerror(errno), errno);
         }
         
-        
+        [self performSelectorForDelegates:@selector(serialPortWillClose:)];
         close([self fileDescriptor]);
         self.fileDescriptor = -1;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            for (id delegate in self.delegates) {
-                if ([delegate respondsToSelector:@selector(serialPortDidClose:)])
-                {
-                    [delegate serialPortDidClose:self];
-                }
-            }
-        });
+        [self performSelectorForDelegates:@selector(serialPortDidClose:)];
     }
 }
 
@@ -451,9 +481,14 @@
 
 
 #pragma mark Settings
+/*
+ - (BOOL) serialPortShouldChangeSettings:(EISerialPort *)port;
+ - (void) serialPortWillChangeSettings:(EISerialPort *)port;
+ - (void) serialPortDidChangeSettings:(EISerialPort *)port;
+ */
 - (void) startModifyingSettings;
 {
-    dispatch_async(self.sendQueue, ^ {
+    dispatch_async(self.sendQueue, ^{
         int returnCode;
         
         returnCode = tcgetattr(self.fileDescriptor, &_modifiedAttributes);
@@ -468,15 +503,18 @@
 
 - (void) finishModifyingSettings;
 {
-    dispatch_async(self.sendQueue, ^ {
+    dispatch_async(self.sendQueue, ^{
         int returnCode;
         
+        [self performSelectorForDelegates:@selector(serialPortWillChangeSettings:)];
         returnCode = tcsetattr(self.fileDescriptor, TCSANOW, &_modifiedAttributes);
         if (returnCode == -1)
         {
             NSLog(@"Failed to modify attributes for %@", self);
             NSLog(@"is Open %@",[self isOpen] ? @"YES" : @"NO");
             NSLog(@"Error setting tty attributes in endModifyingAttributes %s(%d).\n", strerror(errno), errno);
+        } else {
+            [self performSelectorForDelegates:@selector(serialPortDidChangeSettings:)];
         }
     } );
 }

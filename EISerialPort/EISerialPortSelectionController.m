@@ -109,7 +109,7 @@ NSString * const EISelectedSerialPortNameKey = @"selectedSerialPortNameKey";
     NSArray *sortedPorts;
     NSSortDescriptor *sortDesc = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
     
-    sortedPorts = [self.portManager.availablePorts sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDesc]];
+    sortedPorts = [self.portManager.availablePorts sortedArrayUsingDescriptors:@[sortDesc]];
     return sortedPorts;
 }
 

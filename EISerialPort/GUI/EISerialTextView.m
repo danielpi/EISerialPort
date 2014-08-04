@@ -64,7 +64,7 @@
     
     float charWidth = [[defaultFont screenFontWithRenderingMode:NSFontDefaultRenderingMode] advancementForGlyph:(NSGlyph) ' '].width;
     [paragraphStyle setDefaultTabInterval:(charWidth * 4)];
-    [paragraphStyle setTabStops:[NSArray array]];
+    [paragraphStyle setTabStops:@[]];
     
     [self setDefaultParagraphStyle:paragraphStyle];
     
@@ -228,6 +228,7 @@
     NSString *toBeSent;
     NSRange remainderRange;
     NSString *remainder;
+    NSMutableString *inputStringCopy;
     
     // Need to find backspace, new line, carraige return
     // Would also like to identify echoed characters
@@ -241,18 +242,20 @@
     // Then send the remaining characters back into the function to look for more control
     // characters
     
+    inputStringCopy = [NSMutableString stringWithString:inputString];
+    
     // Look through the text and find any control characters
-    controlCharacterRange = [inputString rangeOfCharacterFromSet:[NSCharacterSet controlCharacterSet]];
+    controlCharacterRange = [inputStringCopy rangeOfCharacterFromSet:[NSCharacterSet controlCharacterSet]];
     
     if ((controlCharacterRange.length > 0) && (controlCharacterRange.location < 1)) {
         // Deal with the first control character
-        NSString *controlCharacter = [inputString substringWithRange:controlCharacterRange];
+        NSString *controlCharacter = [inputStringCopy substringWithRange:controlCharacterRange];
         
-        if ([controlCharacter isEqualToString:@"\r"] && ([inputString length] > 1)) {
-            NSString *peekAhead = [inputString substringWithRange:NSMakeRange(1, 1)];
+        if ([controlCharacter isEqualToString:@"\r"] && ([inputStringCopy length] > 1)) {
+            NSString *peekAhead = [inputStringCopy substringWithRange:NSMakeRange(1, 1)];
             if ([peekAhead isEqualToString:@"\n"]) {
                 controlCharacter = peekAhead;
-                inputString = [inputString substringFromIndex:1];
+                inputStringCopy = [inputStringCopy substringFromIndex:1];
             }
         }
         
@@ -309,21 +312,21 @@
         [self setSelectedRanges:originalSelectionArray];
         
         remainderRange.location = controlCharacterRange.location + 1;
-        remainderRange.length = [inputString length] - 1;
-        remainder = [inputString substringWithRange:remainderRange];
+        remainderRange.length = [inputStringCopy length] - 1;
+        remainder = [inputStringCopy substringWithRange:remainderRange];
     } else {
         if (controlCharacterRange.length > 0) {
             // There is a chunk of text before the control character
             toBeSentRange.location = 0;
-            toBeSentRange.length = MIN(controlCharacterRange.location,[inputString length]);
-            toBeSent = [inputString substringWithRange:toBeSentRange];
+            toBeSentRange.length = MIN(controlCharacterRange.location,[inputStringCopy length]);
+            toBeSent = [inputStringCopy substringWithRange:toBeSentRange];
             
             remainderRange.location = toBeSentRange.length;
-            remainderRange.length = [inputString length] - remainderRange.location;
-            remainder = [inputString substringWithRange:remainderRange];
+            remainderRange.length = [inputStringCopy length] - remainderRange.location;
+            remainder = [inputStringCopy substringWithRange:remainderRange];
         } else {
             // There was no control character
-            toBeSent = inputString;
+            toBeSent = inputStringCopy;
             remainder = [NSString stringWithFormat:@""];
         }
         /*

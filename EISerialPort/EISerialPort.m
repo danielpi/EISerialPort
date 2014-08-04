@@ -402,7 +402,7 @@
                 [self setParity:(EISerialParity)[[defaults objectForKey:[NSString stringWithFormat:@"%@-parity", self.name]] integerValue]];
                 [self setStopBits:(EISerialStopBits)[[defaults objectForKey:[NSString stringWithFormat:@"%@-stopBits", self.name]] integerValue]];
                 [self setFlowControl:(EISerialFlowControl)[[defaults objectForKey:[NSString stringWithFormat:@"%@-flowControl", self.name]] integerValue]];
-                [self setLatency:[NSNumber numberWithInt:1]];
+                [self setLatency:@1];
                 
                 [self setupReceiveThread];
                 
@@ -545,9 +545,9 @@
     if (returnCode == -1)
     {
         NSLog(@"Error getting tty attributes in getBaudRate");
-        return [NSNumber numberWithInt:returnCode];
+        return @(returnCode);
     }
-    baudRate = [NSNumber numberWithLong:cfgetispeed(&currentAttributes)];
+    baudRate = @(cfgetispeed(&currentAttributes));
     
 	return baudRate;
 }
@@ -611,7 +611,7 @@
     [self finishModifyingSettings];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSNumber numberWithInt:method] forKey:[NSString stringWithFormat:@"%@-flowControl", self.name]];
+    [defaults setObject:@(method) forKey:[NSString stringWithFormat:@"%@-flowControl", self.name]];
 }
 
 
@@ -662,7 +662,7 @@
     [self finishModifyingSettings];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSNumber numberWithInt:parity] forKey:[NSString stringWithFormat:@"%@-parity", self.name]];
+    [defaults setObject:@(parity) forKey:[NSString stringWithFormat:@"%@-parity", self.name]];
 }
 
 
@@ -788,7 +788,7 @@
         // Flag an error
     }
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSNumber numberWithInt:stopBits] forKey:[NSString stringWithFormat:@"%@-stopBits", self.name]];
+    [defaults setObject:@(stopBits) forKey:[NSString stringWithFormat:@"%@-stopBits", self.name]];
 }
 
 -(void)setOneStopBit
@@ -866,7 +866,7 @@
     } );
     [self finishModifyingSettings];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSNumber numberWithInt:dataBits] forKey:[NSString stringWithFormat:@"%@-dataBits", self.name]];
+    [defaults setObject:@(dataBits) forKey:[NSString stringWithFormat:@"%@-dataBits", self.name]];
 }
 
 - (NSArray *)standardBaudRates
@@ -930,24 +930,24 @@
      IMAXBEL   ring bell on input queue full
      IUCLC     translate upper case to lower case
      */
-    NSDictionary *c_iflagsDict = @{ @"IGNBRK " : [NSNumber numberWithInt:IGNBRK], \
-                                    @"BRKINT " : [NSNumber numberWithInt:BRKINT], \
-                                    @"IGNPAR " : [NSNumber numberWithInt:IGNPAR], \
-                                    @"PARMRK " : [NSNumber numberWithInt:PARMRK], \
-                                    @"INPCK  " : [NSNumber numberWithInt:INPCK], \
-                                    @"ISTRIP " : [NSNumber numberWithInt:ISTRIP], \
-                                    @"INLCR  " : [NSNumber numberWithInt:INLCR], \
-                                    @"IGNCR  " : [NSNumber numberWithInt:IGNCR], \
-                                    @"ICRNL  " : [NSNumber numberWithInt:ICRNL], \
-                                    @"IXON   " : [NSNumber numberWithInt:IXON], \
-                                    @"IXOFF  " : [NSNumber numberWithInt:IXOFF], \
-                                    @"IXANY  " : [NSNumber numberWithInt:IXANY], \
-                                    @"IMAXBEL" : [NSNumber numberWithInt:IMAXBEL],};
+    NSDictionary *c_iflagsDict = @{ @"IGNBRK " : @(IGNBRK), \
+                                    @"BRKINT " : @(BRKINT), \
+                                    @"IGNPAR " : @(IGNPAR), \
+                                    @"PARMRK " : @(PARMRK), \
+                                    @"INPCK  " : @(INPCK), \
+                                    @"ISTRIP " : @(ISTRIP), \
+                                    @"INLCR  " : @(INLCR), \
+                                    @"IGNCR  " : @(IGNCR), \
+                                    @"ICRNL  " : @(ICRNL), \
+                                    @"IXON   " : @(IXON), \
+                                    @"IXOFF  " : @(IXOFF), \
+                                    @"IXANY  " : @(IXANY), \
+                                    @"IMAXBEL" : @(IMAXBEL),};
     
     NSLog(@"\nc_iflag");
     NSString *key;
     for(key in c_iflagsDict){
-        NSLog(@"%@:%@", key, (attributes.c_iflag & [[c_iflagsDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
+        NSLog(@"%@:%@", key, (attributes.c_iflag & [c_iflagsDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     
     /* c_oflag
@@ -960,16 +960,16 @@
      ONOCR    No CR output at column 0
      ONLRET   NL performs CR function
      */
-    NSDictionary *c_oflagsDict = @{ @"OPOST " : [NSNumber numberWithInt:OPOST], \
-                                    @"ONLCR " : [NSNumber numberWithInt:ONLCR], \
-                                    @"OXTABS" : [NSNumber numberWithInt:OXTABS], \
-                                    @"ONOEOT" : [NSNumber numberWithInt:ONOEOT], \
-                                    @"OCRNL " : [NSNumber numberWithInt:OCRNL], \
-                                    @"ONOCR " : [NSNumber numberWithInt:ONOCR], \
-                                    @"ONLRET" : [NSNumber numberWithInt:ONLRET],};
+    NSDictionary *c_oflagsDict = @{ @"OPOST " : @(OPOST), \
+                                    @"ONLCR " : @(ONLCR), \
+                                    @"OXTABS" : @(OXTABS), \
+                                    @"ONOEOT" : @(ONOEOT), \
+                                    @"OCRNL " : @(OCRNL), \
+                                    @"ONOCR " : @(ONOCR), \
+                                    @"ONLRET" : @(ONLRET),};
     NSLog(@"\nc_oflag");
     for(key in c_oflagsDict){
-        NSLog(@"%@:%@", key, (attributes.c_oflag & [[c_oflagsDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
+        NSLog(@"%@:%@", key, (attributes.c_oflag & [c_oflagsDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     
     /* c_cflag
@@ -1016,24 +1016,24 @@
         #define	MDMBUF		0x00100000	 old name for CCAR_OFLOW
         #endif
      */
-    NSDictionary *c_cflagDict = @{ @"CIGNORE       " : [NSNumber numberWithInt:CIGNORE], \
-                                   @"CS6           " : [NSNumber numberWithInt:CS6], \
-                                   @"CS7           " : [NSNumber numberWithInt:CS7], \
-                                   @"2STOPB        " : [NSNumber numberWithInt:CSTOPB], \
-                                   @"CREAD         " : [NSNumber numberWithInt:CREAD], \
-                                   @"PARENB        " : [NSNumber numberWithInt:PARENB], \
-                                   @"PARODD        " : [NSNumber numberWithInt:PARODD], \
-                                   @"HUPCL         " : [NSNumber numberWithInt:HUPCL], \
-                                   @"CLOCAL        " : [NSNumber numberWithInt:CLOCAL], \
-                                   @"CCTS_OFLOW    " : [NSNumber numberWithInt:CCTS_OFLOW],
-                                   @"CRTS_IFLOW    " : [NSNumber numberWithInt:CRTS_IFLOW], \
-                                   @"CDTR_IFLOW    " : [NSNumber numberWithInt:CDTR_IFLOW], \
-                                   @"CDSR_OFLOW    " : [NSNumber numberWithInt:CDSR_OFLOW], \
-                                   @"CCAR_OFLOW    " : [NSNumber numberWithInt:CCAR_OFLOW], \
-                                   @"MDMBUF        " : [NSNumber numberWithInt:EXTPROC],  };
+    NSDictionary *c_cflagDict = @{ @"CIGNORE       " : @(CIGNORE), \
+                                   @"CS6           " : @(CS6), \
+                                   @"CS7           " : @(CS7), \
+                                   @"2STOPB        " : @(CSTOPB), \
+                                   @"CREAD         " : @(CREAD), \
+                                   @"PARENB        " : @(PARENB), \
+                                   @"PARODD        " : @(PARODD), \
+                                   @"HUPCL         " : @(HUPCL), \
+                                   @"CLOCAL        " : @(CLOCAL), \
+                                   @"CCTS_OFLOW    " : @(CCTS_OFLOW),
+                                   @"CRTS_IFLOW    " : @(CRTS_IFLOW), \
+                                   @"CDTR_IFLOW    " : @(CDTR_IFLOW), \
+                                   @"CDSR_OFLOW    " : @(CDSR_OFLOW), \
+                                   @"CCAR_OFLOW    " : @(CCAR_OFLOW), \
+                                   @"MDMBUF        " : @(EXTPROC),  };
     NSLog(@"\nc_cflag");
     for(key in c_cflagDict){
-        NSLog(@"%@:%@", key, (attributes.c_cflag & [[c_cflagDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
+        NSLog(@"%@:%@", key, (attributes.c_cflag & [c_cflagDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     /* c_lflagrf
      ECHOKE       visual erase for line kill
@@ -1053,25 +1053,25 @@
      PENDIN       XXX retype pending input (state)
      NOFLSH       don't flush after interrupt
      */
-    NSDictionary *c_lflagDict = @{ @"ECHOKE     " : [NSNumber numberWithInt:ECHOKE], \
-                                   @"ECHOE     " : [NSNumber numberWithInt:ECHOE], \
-                                   @"ECHO      " : [NSNumber numberWithInt:ECHO], \
-                                   @"ECHONL    " : [NSNumber numberWithInt:ECHONL], \
-                                   @"ECHOPRT   " : [NSNumber numberWithInt:ECHOPRT], \
-                                   @"ECHOCTL   " : [NSNumber numberWithInt:ECHOCTL], \
-                                   @"ISIG      " : [NSNumber numberWithInt:ISIG], \
-                                   @"ICANON    " : [NSNumber numberWithInt:ICANON],
-                                   @"ALTWERASE " : [NSNumber numberWithInt:ALTWERASE], \
-                                   @"IEXTEN    " : [NSNumber numberWithInt:IEXTEN], \
-                                   @"EXTPROC   " : [NSNumber numberWithInt:EXTPROC], \
-                                   @"TOSTOP    " : [NSNumber numberWithInt:TOSTOP], \
-                                   @"FLUSHO    " : [NSNumber numberWithInt:FLUSHO], \
-                                   @"NOKERNINFO" : [NSNumber numberWithInt:NOKERNINFO], \
-                                   @"NOFLSH    " : [NSNumber numberWithInt:NOFLSH], \
-                                   @"PENDIN    " : [NSNumber numberWithInt:PENDIN], };
+    NSDictionary *c_lflagDict = @{ @"ECHOKE    " : @(ECHOKE), \
+                                   @"ECHOE     " : @(ECHOE), \
+                                   @"ECHO      " : @(ECHO), \
+                                   @"ECHONL    " : @(ECHONL), \
+                                   @"ECHOPRT   " : @(ECHOPRT), \
+                                   @"ECHOCTL   " : @(ECHOCTL), \
+                                   @"ISIG      " : @(ISIG), \
+                                   @"ICANON    " : @(ICANON),
+                                   @"ALTWERASE " : @(ALTWERASE), \
+                                   @"IEXTEN    " : @(IEXTEN), \
+                                   @"EXTPROC   " : @(EXTPROC), \
+                                   @"TOSTOP    " : @(TOSTOP), \
+                                   @"FLUSHO    " : @(FLUSHO), \
+                                   @"NOKERNINFO" : @(NOKERNINFO), \
+                                   @"NOFLSH    " : @(NOFLSH), \
+                                   @"PENDIN    " : @(PENDIN), };
     NSLog(@"\nc_lflag");
     for(key in c_lflagDict){
-        NSLog(@"%@:%@", key, (attributes.c_lflag & [[c_lflagDict objectForKey: key] intValue]) ? @"TRUE" : @"FALSE");
+        NSLog(@"%@:%@", key, (attributes.c_lflag & [c_lflagDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
 }
 
@@ -1083,7 +1083,7 @@
     float delayPerBit;
     
     // What is the bad rate
-    baudRate = [NSNumber numberWithLong:cfgetispeed(&attributes)];
+    baudRate = @(cfgetispeed(&attributes));
     delayPerBit = (float)1/[baudRate intValue];
     
     // Start bit

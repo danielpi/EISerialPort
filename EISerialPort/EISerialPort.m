@@ -1217,10 +1217,12 @@
         [self setCancelled:NO];
         
         for (id delegate in self.delegates) {
-            if ([delegate respondsToSelector:@selector(serialPort:didSendData:)])
-            {
-                [delegate performSelector:@selector(serialPort:didSendData:) withObject:self withObject:dataToSend];
-            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ([delegate respondsToSelector:@selector(serialPort:didSendData:)])
+                {
+                    [delegate performSelector:@selector(serialPort:didSendData:) withObject:self withObject:dataToSend];
+                }
+            });
         }
         
     };

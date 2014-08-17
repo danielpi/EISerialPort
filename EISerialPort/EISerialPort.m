@@ -310,7 +310,7 @@
                     
                     switch (errno) {
                         default:
-                            description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"");
+                            description = NSLocalizedString(@"Serial port failed to open for an unknown reason", @"Unkown serial port failure");
                             errCode = EISerialPortUnknownOpeningError;
                             break;
                     }
@@ -349,11 +349,11 @@
                         
                         switch (errno) {
                             case EBADF:
-                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"Unknown opening error");
                                 errCode = EISerialPortUnknownOpeningError;
                                 break;
                             default:
-                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"");
+                                description = NSLocalizedString(@"Error setting TIOCEXCL", @"Unknown IOCTL Error");
                                 errCode = EISerialPortUnknownIOCTLError;
                                 break;
                         }
@@ -945,8 +945,7 @@
                                     @"IMAXBEL" : @(IMAXBEL),};
     
     NSLog(@"\nc_iflag");
-    NSString *key;
-    for(key in c_iflagsDict){
+    for(NSString *key in c_iflagsDict){
         NSLog(@"%@:%@", key, (attributes.c_iflag & [c_iflagsDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     
@@ -968,7 +967,7 @@
                                     @"ONOCR " : @(ONOCR), \
                                     @"ONLRET" : @(ONLRET),};
     NSLog(@"\nc_oflag");
-    for(key in c_oflagsDict){
+    for(NSString *key in c_oflagsDict){
         NSLog(@"%@:%@", key, (attributes.c_oflag & [c_oflagsDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     
@@ -1032,7 +1031,7 @@
                                    @"CCAR_OFLOW    " : @(CCAR_OFLOW), \
                                    @"MDMBUF        " : @(EXTPROC),  };
     NSLog(@"\nc_cflag");
-    for(key in c_cflagDict){
+    for(NSString *key in c_cflagDict){
         NSLog(@"%@:%@", key, (attributes.c_cflag & [c_cflagDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
     /* c_lflagrf
@@ -1070,7 +1069,7 @@
                                    @"NOFLSH    " : @(NOFLSH), \
                                    @"PENDIN    " : @(PENDIN), };
     NSLog(@"\nc_lflag");
-    for(key in c_lflagDict){
+    for(NSString *key in c_lflagDict){
         NSLog(@"%@:%@", key, (attributes.c_lflag & [c_lflagDict[key] intValue]) ? @"TRUE" : @"FALSE");
     }
 }

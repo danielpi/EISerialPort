@@ -1,0 +1,463 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E62C152019AC00DE0067CDAB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62C151F19AC00DE0067CDAB /* main.swift */; };
+		E62C152219AC00DE0067CDAB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62C152119AC00DE0067CDAB /* AppDelegate.swift */; };
+		E62C152419AC00DE0067CDAB /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E62C152319AC00DE0067CDAB /* Images.xcassets */; };
+		E62C152719AC00DE0067CDAB /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E62C152519AC00DE0067CDAB /* MainMenu.xib */; };
+		E62C153319AC00DE0067CDAB /* EISerialPortSwiftExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62C153219AC00DE0067CDAB /* EISerialPortSwiftExampleTests.swift */; };
+		E62C153D19AC00EC0067CDAB /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E62C153C19AC00EC0067CDAB /* IOKit.framework */; };
+		E62C154919AC01030067CDAB /* EISerialPort.m in Sources */ = {isa = PBXBuildFile; fileRef = E62C154019AC01030067CDAB /* EISerialPort.m */; };
+		E62C154A19AC01030067CDAB /* EISerialPortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E62C154319AC01030067CDAB /* EISerialPortManager.m */; };
+		E62C154B19AC01030067CDAB /* EISerialPortSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = E62C154519AC01030067CDAB /* EISerialPortSelectionController.m */; };
+		E62C154C19AC01030067CDAB /* EISerialTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = E62C154819AC01030067CDAB /* EISerialTextView.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E62C152D19AC00DE0067CDAB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E62C151219AC00DE0067CDAB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E62C151919AC00DE0067CDAB;
+			remoteInfo = EISerialPortSwiftExample;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		E62C151A19AC00DE0067CDAB /* EISerialPortSwiftExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EISerialPortSwiftExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E62C151E19AC00DE0067CDAB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E62C151F19AC00DE0067CDAB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		E62C152119AC00DE0067CDAB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E62C152319AC00DE0067CDAB /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		E62C152619AC00DE0067CDAB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		E62C152C19AC00DE0067CDAB /* EISerialPortSwiftExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EISerialPortSwiftExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E62C153119AC00DE0067CDAB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E62C153219AC00DE0067CDAB /* EISerialPortSwiftExampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EISerialPortSwiftExampleTests.swift; sourceTree = "<group>"; };
+		E62C153C19AC00EC0067CDAB /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		E62C153F19AC01030067CDAB /* EISerialPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPort.h; sourceTree = "<group>"; };
+		E62C154019AC01030067CDAB /* EISerialPort.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialPort.m; sourceTree = "<group>"; };
+		E62C154119AC01030067CDAB /* EISerialPortError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortError.h; sourceTree = "<group>"; };
+		E62C154219AC01030067CDAB /* EISerialPortManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortManager.h; sourceTree = "<group>"; };
+		E62C154319AC01030067CDAB /* EISerialPortManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialPortManager.m; sourceTree = "<group>"; };
+		E62C154419AC01030067CDAB /* EISerialPortSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialPortSelectionController.h; sourceTree = "<group>"; };
+		E62C154519AC01030067CDAB /* EISerialPortSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialPortSelectionController.m; sourceTree = "<group>"; };
+		E62C154719AC01030067CDAB /* EISerialTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EISerialTextView.h; sourceTree = "<group>"; };
+		E62C154819AC01030067CDAB /* EISerialTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EISerialTextView.m; sourceTree = "<group>"; };
+		E62C154D19AC03AD0067CDAB /* EISerialPortSwiftExample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EISerialPortSwiftExample-Bridging-Header.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E62C151719AC00DE0067CDAB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E62C153D19AC00EC0067CDAB /* IOKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E62C152919AC00DE0067CDAB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E62C151119AC00DE0067CDAB = {
+			isa = PBXGroup;
+			children = (
+				E62C153C19AC00EC0067CDAB /* IOKit.framework */,
+				E62C151C19AC00DE0067CDAB /* EISerialPortSwiftExample */,
+				E62C152F19AC00DE0067CDAB /* EISerialPortSwiftExampleTests */,
+				E62C151B19AC00DE0067CDAB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E62C151B19AC00DE0067CDAB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E62C151A19AC00DE0067CDAB /* EISerialPortSwiftExample.app */,
+				E62C152C19AC00DE0067CDAB /* EISerialPortSwiftExampleTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E62C151C19AC00DE0067CDAB /* EISerialPortSwiftExample */ = {
+			isa = PBXGroup;
+			children = (
+				E62C153E19AC01030067CDAB /* EISerialPort */,
+				E62C154D19AC03AD0067CDAB /* EISerialPortSwiftExample-Bridging-Header.h */,
+				E62C152119AC00DE0067CDAB /* AppDelegate.swift */,
+				E62C152319AC00DE0067CDAB /* Images.xcassets */,
+				E62C152519AC00DE0067CDAB /* MainMenu.xib */,
+				E62C151D19AC00DE0067CDAB /* Supporting Files */,
+			);
+			path = EISerialPortSwiftExample;
+			sourceTree = "<group>";
+		};
+		E62C151D19AC00DE0067CDAB /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E62C151E19AC00DE0067CDAB /* Info.plist */,
+				E62C151F19AC00DE0067CDAB /* main.swift */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E62C152F19AC00DE0067CDAB /* EISerialPortSwiftExampleTests */ = {
+			isa = PBXGroup;
+			children = (
+				E62C153219AC00DE0067CDAB /* EISerialPortSwiftExampleTests.swift */,
+				E62C153019AC00DE0067CDAB /* Supporting Files */,
+			);
+			path = EISerialPortSwiftExampleTests;
+			sourceTree = "<group>";
+		};
+		E62C153019AC00DE0067CDAB /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E62C153119AC00DE0067CDAB /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E62C153E19AC01030067CDAB /* EISerialPort */ = {
+			isa = PBXGroup;
+			children = (
+				E62C153F19AC01030067CDAB /* EISerialPort.h */,
+				E62C154019AC01030067CDAB /* EISerialPort.m */,
+				E62C154119AC01030067CDAB /* EISerialPortError.h */,
+				E62C154219AC01030067CDAB /* EISerialPortManager.h */,
+				E62C154319AC01030067CDAB /* EISerialPortManager.m */,
+				E62C154419AC01030067CDAB /* EISerialPortSelectionController.h */,
+				E62C154519AC01030067CDAB /* EISerialPortSelectionController.m */,
+				E62C154619AC01030067CDAB /* GUI */,
+			);
+			name = EISerialPort;
+			path = ../../EISerialPort;
+			sourceTree = "<group>";
+		};
+		E62C154619AC01030067CDAB /* GUI */ = {
+			isa = PBXGroup;
+			children = (
+				E62C154719AC01030067CDAB /* EISerialTextView.h */,
+				E62C154819AC01030067CDAB /* EISerialTextView.m */,
+			);
+			path = GUI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E62C151919AC00DE0067CDAB /* EISerialPortSwiftExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E62C153619AC00DE0067CDAB /* Build configuration list for PBXNativeTarget "EISerialPortSwiftExample" */;
+			buildPhases = (
+				E62C151619AC00DE0067CDAB /* Sources */,
+				E62C151719AC00DE0067CDAB /* Frameworks */,
+				E62C151819AC00DE0067CDAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EISerialPortSwiftExample;
+			productName = EISerialPortSwiftExample;
+			productReference = E62C151A19AC00DE0067CDAB /* EISerialPortSwiftExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E62C152B19AC00DE0067CDAB /* EISerialPortSwiftExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E62C153919AC00DE0067CDAB /* Build configuration list for PBXNativeTarget "EISerialPortSwiftExampleTests" */;
+			buildPhases = (
+				E62C152819AC00DE0067CDAB /* Sources */,
+				E62C152919AC00DE0067CDAB /* Frameworks */,
+				E62C152A19AC00DE0067CDAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E62C152E19AC00DE0067CDAB /* PBXTargetDependency */,
+			);
+			name = EISerialPortSwiftExampleTests;
+			productName = EISerialPortSwiftExampleTests;
+			productReference = E62C152C19AC00DE0067CDAB /* EISerialPortSwiftExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E62C151219AC00DE0067CDAB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = "Electronic Innovations";
+				TargetAttributes = {
+					E62C151919AC00DE0067CDAB = {
+						CreatedOnToolsVersion = 6.0;
+					};
+					E62C152B19AC00DE0067CDAB = {
+						CreatedOnToolsVersion = 6.0;
+						TestTargetID = E62C151919AC00DE0067CDAB;
+					};
+				};
+			};
+			buildConfigurationList = E62C151519AC00DE0067CDAB /* Build configuration list for PBXProject "EISerialPortSwiftExample" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E62C151119AC00DE0067CDAB;
+			productRefGroup = E62C151B19AC00DE0067CDAB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E62C151919AC00DE0067CDAB /* EISerialPortSwiftExample */,
+				E62C152B19AC00DE0067CDAB /* EISerialPortSwiftExampleTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E62C151819AC00DE0067CDAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E62C152419AC00DE0067CDAB /* Images.xcassets in Resources */,
+				E62C152719AC00DE0067CDAB /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E62C152A19AC00DE0067CDAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E62C151619AC00DE0067CDAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E62C152219AC00DE0067CDAB /* AppDelegate.swift in Sources */,
+				E62C152019AC00DE0067CDAB /* main.swift in Sources */,
+				E62C154B19AC01030067CDAB /* EISerialPortSelectionController.m in Sources */,
+				E62C154A19AC01030067CDAB /* EISerialPortManager.m in Sources */,
+				E62C154919AC01030067CDAB /* EISerialPort.m in Sources */,
+				E62C154C19AC01030067CDAB /* EISerialTextView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E62C152819AC00DE0067CDAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E62C153319AC00DE0067CDAB /* EISerialPortSwiftExampleTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E62C152E19AC00DE0067CDAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E62C151919AC00DE0067CDAB /* EISerialPortSwiftExample */;
+			targetProxy = E62C152D19AC00DE0067CDAB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E62C152519AC00DE0067CDAB /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E62C152619AC00DE0067CDAB /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E62C153419AC00DE0067CDAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E62C153519AC00DE0067CDAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E62C153719AC00DE0067CDAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = EISerialPortSwiftExample/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "EISerialPortSwiftExample/EISerialPortSwiftExample-Bridging-Header.h";
+			};
+			name = Debug;
+		};
+		E62C153819AC00DE0067CDAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = EISerialPortSwiftExample/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "EISerialPortSwiftExample/EISerialPortSwiftExample-Bridging-Header.h";
+			};
+			name = Release;
+		};
+		E62C153A19AC00DE0067CDAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = EISerialPortSwiftExampleTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EISerialPortSwiftExample.app/Contents/MacOS/EISerialPortSwiftExample";
+			};
+			name = Debug;
+		};
+		E62C153B19AC00DE0067CDAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = EISerialPortSwiftExampleTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EISerialPortSwiftExample.app/Contents/MacOS/EISerialPortSwiftExample";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E62C151519AC00DE0067CDAB /* Build configuration list for PBXProject "EISerialPortSwiftExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E62C153419AC00DE0067CDAB /* Debug */,
+				E62C153519AC00DE0067CDAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E62C153619AC00DE0067CDAB /* Build configuration list for PBXNativeTarget "EISerialPortSwiftExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E62C153719AC00DE0067CDAB /* Debug */,
+				E62C153819AC00DE0067CDAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		E62C153919AC00DE0067CDAB /* Build configuration list for PBXNativeTarget "EISerialPortSwiftExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E62C153A19AC00DE0067CDAB /* Debug */,
+				E62C153B19AC00DE0067CDAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E62C151219AC00DE0067CDAB /* Project object */;
+}

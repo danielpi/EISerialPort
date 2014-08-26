@@ -4,6 +4,9 @@ A Cocoa serial port framework for rapidly developing apps that talk to micro-con
 
 Micro-controller based projects allow you to interact with the physical world, however their UI is usually terrible. Mac OS X apps have beautiful UI but have difficulty affecting the world outside of the computer. Marrying these two worlds gives a great opportunity to improve both areas. This should be simple to achieve.
 
+### Swift Compatibility
+This library can be used with Swift via the Bridging Header method detailed in the “Using Swift with Cocoa and Objective-C.” iBook. https://itun.es/au/1u3-0.l. There is an example project called EISerialPortSwiftExample which demonstrates how to build a simple serial terminal in Swift.
+
 ## How to use this library
 
 The main components of this library are

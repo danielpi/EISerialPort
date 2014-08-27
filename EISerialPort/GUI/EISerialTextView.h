@@ -38,7 +38,7 @@
 - (void)sendReset:(id)sender;
 - (void)cancelTransmit:(id)sender;
 
-// EISerialDelegate
+// EISerialPortDelegate
 //- (void) serialPortDidReceiveData:(NSData *)data;
 //- (void) serialPortDidSendData:(NSData *)data;
 @end

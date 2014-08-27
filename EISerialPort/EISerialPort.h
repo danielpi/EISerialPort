@@ -44,7 +44,7 @@ typedef enum {
 
 
 
-@protocol EISerialDelegate <NSObject>
+@protocol EISerialPortDelegate <NSObject>
 
 @optional
 

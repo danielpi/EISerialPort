@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialDelegate, EISerialTextViewDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialPortDelegate, EISerialTextViewDelegate {
                             
     @IBOutlet weak var window: NSWindow!
     @IBOutlet weak var openCloseButton: NSButton!
@@ -94,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
     }
 
     
-    // MARK: EISerialDelegate
+    // MARK: EISerialPortDelegate
     func serialPortDidOpen(port: EISerialPort!) {
         updateSerialPortUI()
         port.baudRate = 57600

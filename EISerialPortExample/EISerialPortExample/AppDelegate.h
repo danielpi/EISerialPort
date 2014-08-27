@@ -11,7 +11,7 @@
 #import "EISerialTextView.h"
 #import "EISerialPortSelectionController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialDelegate, EISerialTextViewDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, EISerialPortSelectionDelegate, EISerialPortDelegate, EISerialTextViewDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (readonly, strong) EISerialPortSelectionController *portSelectionController;

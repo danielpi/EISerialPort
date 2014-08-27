@@ -222,7 +222,7 @@
 }
 
 
-#pragma mark EISerialDelegate
+#pragma mark EISerialPortDelegate
 
 - (void) serialPortDidOpen:(EISerialPort *)port
 {

@@ -33,8 +33,6 @@
 - (IBAction)changeStopBits:(id)sender;
 - (IBAction)changeFlowControl:(id)sender;
 
-- (void)serialPortDidReceiveData:(NSData *)data;
-
 - (void)receivedDataFromUser:(NSData *)data;
 - (void)receivedStringFromUser:(NSString *)string;
 

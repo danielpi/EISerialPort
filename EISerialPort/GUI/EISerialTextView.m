@@ -255,7 +255,7 @@
             NSString *peekAhead = [inputStringCopy substringWithRange:NSMakeRange(1, 1)];
             if ([peekAhead isEqualToString:@"\n"]) {
                 controlCharacter = peekAhead;
-                inputStringCopy = [inputStringCopy substringFromIndex:1];
+                inputStringCopy = (NSMutableString *)[inputStringCopy substringFromIndex:1];
             }
         }
         

@@ -236,7 +236,9 @@
         for (id delegate in self.delegates) {
             if ([delegate respondsToSelector:selector])
             {
-                [delegate performSelector:selector withObject:self];
+                //[delegate performSelector:selector withObject:self]; // This line could leak memory as ARC can't figure out what may be returned
+                // http://joystate.wordpress.com/2014/04/03/warning-performselector-may-cause-a-leak-because-its-selector-is-unknown/
+                [delegate performSelector:selector withObject:self afterDelay:0.0]; // Suggested fix. Here the compiler can be sure that nothing is returned.
             }
         }
     });

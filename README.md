@@ -581,5 +581,6 @@ Rule #6 - Only one line required to get up and going.
 Rule #7 - Could definitely use work here.
 Rule #8 - 
 
-
+### What would be nice in a Swift version of this library?
+- sendCharacter
 

@@ -1162,7 +1162,6 @@
     }
 }
 
-
 - (void) sendKeyCode:(unsigned short)keyCode
 {
     NSData *dataToSend = [NSData dataWithBytes:&keyCode length:1];
@@ -1231,10 +1230,33 @@
     dispatch_async(self.sendQueue, writeData);
 }
 
-
+// This method is untested. Tests should include
+// - What happens if chunkSize == 0
+// - What happens if chunkSize is negative
+// - Do I need to copy dataToSend
 - (void) sendData:(NSData *)dataToSend inChunksOfSize:(NSNumber *)chunkSize
 {
+    unsigned long chunkLength = [chunkSize unsignedIntValue];
+    unsigned long location = 0;
+    unsigned long nextLocation = 0;
+    BOOL atEnd = NO;
+    NSRange chunkRange;
     
+    while (!atEnd) {
+        nextLocation = location + chunkLength;
+        
+        // Check to see if there is a full chunk of data left
+        if (nextLocation > [dataToSend length]) {
+            chunkLength = [dataToSend length] - location;
+            atEnd = YES;
+        }
+        
+        // Send this chunk
+        chunkRange = NSMakeRange(location, chunkLength);
+        [self sendData: [dataToSend subdataWithRange:chunkRange]];
+        
+        location = nextLocation;
+    }
 }
 
 

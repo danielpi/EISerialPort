@@ -17,13 +17,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
     var portSelectionController: EISerialPortSelectionController = EISerialPortSelectionController(label: "Main")
     
 
-    func applicationDidFinishLaunching(aNotification: NSNotification?) {
+    func applicationDidFinishLaunching(aNotification: NSNotification) {
         // Insert code here to initialize your application
         portSelectionController.delegate = self
         terminalView.delegate = self
     }
 
-    func applicationWillTerminate(aNotification: NSNotification?) {
+    func applicationWillTerminate(aNotification: NSNotification) {
         // Insert code here to tear down your application
     }
 
@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
             previouslySelectedPort.delegate = nil
         }
         
-        if let newlySelectedPortName = serialPortSelectionPopUp.selectedItem.title {
+        if let newlySelectedPortName = serialPortSelectionPopUp.selectedItem?.title {
             portSelectionController.selectPortWithName(newlySelectedPortName)
         }
     }
@@ -76,19 +76,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
             let portName = portDetails["name"] as! String
             let portEnabled = portDetails["enabled"] as! Bool
             serialPortSelectionPopUp.addItemWithTitle(portName)
-            serialPortSelectionPopUp.itemWithTitle(portName).enabled = true
+            serialPortSelectionPopUp.itemWithTitle(portName)!.enabled = true
         }
     }
 
     func selectedPortForSelectionControllerWillChange(controller: EISerialPortSelectionController!) {
         if let portDelegate: AnyObject = controller.selectedPort?.delegate {
-            controller.selectedPort.delegate = nil
+            controller.selectedPort!.delegate = nil
         }
     }
 
     func selectedPortForSelectionControllerDidChange(controller: EISerialPortSelectionController!) {
         if (controller.selectedPort != nil) {
-            controller.selectedPort.delegate = self
+            controller.selectedPort!.delegate = self
         }
         self.updateSerialPortUI()
     }
@@ -98,9 +98,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
     func serialPortDidOpen(port: EISerialPort!) {
         updateSerialPortUI()
         port.baudRate = 57600
-        port.dataBits = EIDataBitsEight
-        port.parity = EIParityNone
-        port.stopBits = EIStopbitsOne
+        port.dataBits = .DataBitsEight
+        port.parity = .ParityNone
+        port.stopBits = .StopbitsOne
     }
     
     func serialPortDidClose(port: EISerialPort!) {

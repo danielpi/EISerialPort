@@ -198,6 +198,8 @@
 		E62C151219AC00DE0067CDAB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0720;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Electronic Innovations";
 				TargetAttributes = {
@@ -448,6 +450,7 @@
 				E62C153819AC00DE0067CDAB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E62C153919AC00DE0067CDAB /* Build configuration list for PBXNativeTarget "EISerialPortSwiftExampleTests" */ = {
 			isa = XCConfigurationList;
@@ -456,6 +459,7 @@
 				E62C153B19AC00DE0067CDAB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

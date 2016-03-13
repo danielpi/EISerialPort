@@ -73,8 +73,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, EISerialPortSelectionDelegat
         serialPortSelectionPopUp.removeAllItems()
 
         for portDetails in controller.popUpButtonDetails() {
-            let portName = portDetails["name"] as String
-            let portEnabled = portDetails["enabled"] as Bool
+            let portName = portDetails["name"] as! String
+            let portEnabled = portDetails["enabled"] as! Bool
             serialPortSelectionPopUp.addItemWithTitle(portName)
             serialPortSelectionPopUp.itemWithTitle(portName).enabled = true
         }
